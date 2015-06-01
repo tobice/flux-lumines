@@ -19,7 +19,8 @@
     "flux": "^2.0.3",
     "immutable": "^3.7.2",
     "invariant": "^2.0.0",
-    "react": "^0.13.1"
+    "react": "^0.13.1",
+    "react-pure-render": "^1.0.1"
   },
   "devDependencies": {
     "babel": "^4.0.1",
