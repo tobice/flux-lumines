@@ -7,6 +7,7 @@ const dimensions = {
 
 dimensions.GRID_WIDTH = dimensions.SQUARE_SIZE * dimensions.GRID_COLUMNS;
 dimensions.GRID_HEIGHT = dimensions.SQUARE_SIZE * dimensions.GRID_ROWS;
+dimensions.SCAN_LINE_WIDTH = dimensions.SQUARE_SIZE * 2;
 
 export default dimensions;
 

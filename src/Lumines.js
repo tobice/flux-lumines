@@ -1,6 +1,8 @@
 import React from 'react'
 import {Dispatcher} from 'flux'
 
+import styles from './styles.less'
+
 import debug from './misc/debug.js'
 import State from './misc/State.js'
 import GameInterface from './components/GameInterface.js'

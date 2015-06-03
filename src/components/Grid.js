@@ -1,15 +1,30 @@
 import React from 'react'
 
 import PureComponent from './PureComponent.js'
-import dimensions from '../misc/dimensions.js'
+import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../misc/dimensions.js'
+import {range} from '../misc/jshelpers.js'
 
 export default class Grid extends PureComponent {
     render() {
         return (
-            <rect x={0} y={0}
-                width={dimensions.GRID_WIDTH}
-                height={dimensions.GRID_HEIGHT}
-                style={{stroke: "#000000", fill: "blue"}}/>
+            <g className="lumines-grid">
+                {range(GRID_COLUMNS + 1).map(i =>
+                    <line
+                        key={i}
+                        x1={i * SQUARE_SIZE}
+                        y1={2 * SQUARE_SIZE}
+                        x2={i * SQUARE_SIZE}
+                        y2={GRID_HEIGHT}/>
+                )}
+                {range(GRID_ROWS - 1).map(i =>
+                    <line
+                        key={i}
+                        x1={0}
+                        y1={(i+2) * SQUARE_SIZE}
+                        x2={GRID_WIDTH}
+                        y2={(i+2) * SQUARE_SIZE}/>
+                )}
+            </g>
         )
     }
 }
