@@ -6,7 +6,7 @@ import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../misc/dimensions.js'
 import Move from './Move.js'
 import Grid from './Grid.js'
 import ScanLine from './ScanLine.js'
-
+import Block from './Block.js'
 
 export default class GameInterface extends PureComponent {
     render() {
@@ -22,7 +22,8 @@ export default class GameInterface extends PureComponent {
                 <rect x={0} y={0} width={width} height={height} className="lumines-background" />
                 <Move x={padding.horizontal} y={padding.vertical}>
                     <Grid />
-                    <ScanLine scanLine={this.props.scanLine}/>
+                    <Block block={this.props.block} />
+                    <ScanLine scanLine={this.props.scanLine} />
                 </Move>
             </svg>
         )

@@ -4,12 +4,12 @@ import {UPDATE} from '../misc/actions.js'
 
 export default class ScanLineStore extends BaseStore {
 
-    constructor(dispatcher, state) {
-        super(dispatcher, this.handleAction.bind(this));
+    constructor(dispatcher, state, configStore) {
+        super(dispatcher);
 
         this.cursor = state.cursor([ScanLineStore.name], {
             position: 0,
-            speed: 0.05
+            speed: configStore.baseScanLineSpeed
         });
     }
 
