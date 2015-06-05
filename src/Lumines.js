@@ -9,8 +9,11 @@ import GameInterface from './components/GameInterface.js'
 import ConfigStore from './stores/ConfigStore.js'
 import GravityStore from './stores/GravityStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
-import BlockStore from './stores/BlockStore.js'
-import {UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from './misc/actions.js'
+import SquareStore from './stores/SquareStore.js'
+import {range} from './misc/jshelpers.js'
+import {getRandomBlock} from './misc/squareHelpers.js'
+
+import {UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './misc/actions.js'
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN} from './misc/consts.js'
 
 export default class Lumines {
@@ -23,7 +26,7 @@ export default class Lumines {
         this.configStore = new ConfigStore(this.dispatcher, this.state);
         this.gravityStore = new GravityStore(this.dispatcher, this.state, this.configStore);
         this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore);
-        this.blockStore = new BlockStore(this.dispatcher, this.state, this.configStore, this.gravityStore);
+        this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore, this.gravityStore);
     }
 
     start() {
@@ -48,15 +51,25 @@ export default class Lumines {
                     break;
 
                 case KEY_DOWN:
-                    this.dispatch(DROP)
+                    this.dispatch(DROP);
                     break;
             }
             this.render();
         }, false);
 
+        // Init queue
+        this.dispatch(INIT_QUEUE, range(5).map(getRandomBlock));
+
         // Main game loop
         let time = performance.now();
         setInterval(() => {
+
+            // To keep the flux cycle and the stores completely deterministic, we have to do any
+            // random stuff (like generating new blocks in this case) outside.
+            if (this.squareStore.getQueue().count() < 3) {
+                this.dispatch(REFILL_QUEUE, getRandomBlock());
+            }
+
             this.dispatch(UPDATE, {time: (performance.now() - time) / 1000});
             this.render();
             time = performance.now();
@@ -74,6 +87,7 @@ export default class Lumines {
     render() {
         React.render(<GameInterface
             scanLine={this.scanLineStore.scanLine}
-            block={this.blockStore.block} />, this.mountpoint);
+            block={this.squareStore.getBlock()}
+            queue={this.squareStore.getQueue()} />, this.mountpoint);
     }
 }

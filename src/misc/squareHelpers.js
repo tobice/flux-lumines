@@ -21,8 +21,12 @@ export function blockSquareRow(i) {
     return Math.floor(i / 2);
 }
 
-export function randomSquareColor() {
+export function getRandomSquareColor() {
     return Math.random() > 0.5 ? LIGHT : DARK;
+}
+
+export function getRandomBlock() {
+    return range(4).map(getRandomSquareColor);
 }
 
 export function columnToX(column) {

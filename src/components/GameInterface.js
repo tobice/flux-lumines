@@ -7,6 +7,7 @@ import Move from './Move.js'
 import Grid from './Grid.js'
 import ScanLine from './ScanLine.js'
 import Block from './Block.js'
+import Queue from './Queue.js'
 
 export default class GameInterface extends PureComponent {
     render() {
@@ -20,6 +21,11 @@ export default class GameInterface extends PureComponent {
         return (
             <svg viewBox={"0 0 " + width + " " + height}>
                 <rect x={0} y={0} width={width} height={height} className="lumines-background" />
+
+                <Move x={SQUARE_SIZE / 2} y={3 * SQUARE_SIZE}>
+                    <Queue queue={this.props.queue} />
+                </Move>
+
                 <Move x={padding.horizontal} y={padding.vertical}>
                     <Grid />
                     <Block block={this.props.block} />
