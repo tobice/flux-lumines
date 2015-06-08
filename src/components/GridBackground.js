@@ -4,7 +4,7 @@ import PureComponent from './PureComponent.js'
 import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../misc/dimensions.js'
 import {range} from '../misc/jshelpers.js'
 
-export default class Grid extends PureComponent {
+export default class GridBackground extends PureComponent {
     render() {
         return (
             <g className="lumines-grid">

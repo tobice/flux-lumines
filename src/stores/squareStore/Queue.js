@@ -1,15 +1,11 @@
 import {List} from 'immutable'
+import ImmutableDao from './ImmutableDao.js'
 
 /** Queue of blocks */
-export default class Queue {
+export default class Queue extends ImmutableDao {
 
-    constructor(cursor) {
-        this.cursor = cursor;
+    reset() {
         this.cursor(() => new List());
-    }
-
-    getData() {
-        return this.cursor();
     }
 
     enqueue(squares) {

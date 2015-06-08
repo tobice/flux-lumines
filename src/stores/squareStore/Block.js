@@ -1,24 +1,18 @@
-import Immutable from 'immutable'
+import {Map, List} from 'immutable'
 
-import {GRID_COLUMNS} from '../../misc/dimensions.js'
+import ImmutableDao from './ImmutableDao.js'
+import {GRID_COLUMNS, SQUARE_SIZE} from '../../misc/dimensions.js'
 import {range} from '../../misc/jshelpers.js'
-import {rowToY, yToRow, randomSquareColor} from '../../misc/squareHelpers.js'
+import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, randomSquareColor} from '../../misc/squareHelpers.js'
 
-export default class Block {
-    constructor(cursor) {
-        this.cursor = cursor;
-    }
-
-    getData() {
-        return this.cursor();
-    }
+export default class Block extends ImmutableDao {
 
     reset(speed, squares) {
-        this.cursor(() => Immutable.fromJS({
-            column: GRID_COLUMNS / 2 - 1,
+        this.cursor(() => new Map({
+            x: columnToX(GRID_COLUMNS / 2 - 1),
             y: rowToY(0),
             speed: speed || 0,
-            squares: squares || [0, 0, 0, 0],
+            squares: new List(squares || [0, 0, 0, 0]),
             dropped: false
         }));
     }
@@ -33,8 +27,8 @@ export default class Block {
         ));
     }
 
-    move(column) {
-        this.setProperty('column', column);
+    move(x) {
+        this.setProperty('x', x);
     }
 
     drop() {
@@ -51,15 +45,32 @@ export default class Block {
                 speed + gravity * time * block.get('dropped')));
     }
 
-    get column() {
-        return this.cursor().get('column');
-    }
-
-    set column(column) {
-        this.move(column);
+    get x() {
+        return this.cursor().get('x');
     }
 
     get y() {
         return this.cursor().get('y');
+    }
+
+    get speed() {
+        return this.cursor().get('speed');
+    }
+
+    getFieldsBellow() {
+        return new List([
+            {x: this.x, y: this.y + 2 * SQUARE_SIZE},
+            {x: this.x + SQUARE_SIZE, y: this.y + 2 * SQUARE_SIZE}
+        ]);
+    }
+
+    decomposeToSquares() {
+        const {x, y} = this;
+        return this.cursor().get('squares').map((color, i) => ({
+            x: x + getBlockSquareX(i),
+            y: y + getBlockSquareY(i),
+            color: color,
+            speed: this.speed / 3
+        }));
     }
 }

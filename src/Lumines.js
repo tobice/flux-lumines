@@ -13,7 +13,7 @@ import SquareStore from './stores/SquareStore.js'
 import {range} from './misc/jshelpers.js'
 import {getRandomBlock} from './misc/squareHelpers.js'
 
-import {UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './misc/actions.js'
+import {RESTART, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './misc/actions.js'
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN} from './misc/consts.js'
 
 export default class Lumines {
@@ -27,6 +27,8 @@ export default class Lumines {
         this.gravityStore = new GravityStore(this.dispatcher, this.state, this.configStore);
         this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore);
         this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore, this.gravityStore);
+
+        this.debug = debug('Game');
     }
 
     start() {
@@ -57,7 +59,8 @@ export default class Lumines {
             this.render();
         }, false);
 
-        // Init queue
+        // Init game
+        this.dispatch(RESTART);
         this.dispatch(INIT_QUEUE, range(5).map(getRandomBlock));
 
         // Main game loop
@@ -66,19 +69,21 @@ export default class Lumines {
 
             // To keep the flux cycle and the stores completely deterministic, we have to do any
             // random stuff (like generating new blocks in this case) outside.
-            if (this.squareStore.getQueue().count() < 3) {
+            if (this.squareStore.getQueue().count() < 4) {
                 this.dispatch(REFILL_QUEUE, getRandomBlock());
             }
 
             this.dispatch(UPDATE, {time: (performance.now() - time) / 1000});
             this.render();
             time = performance.now();
+
+            // TODO: adjust fps
         }, 1000/60);
     }
 
     dispatch(action, payload) {
         if (action != UPDATE) {
-            debug('Dispatcher')(action);
+            this.debug('Dispatched ' + action);
         }
 
         this.dispatcher.dispatch({action, payload})
@@ -88,6 +93,8 @@ export default class Lumines {
         React.render(<GameInterface
             scanLine={this.scanLineStore.scanLine}
             block={this.squareStore.getBlock()}
-            queue={this.squareStore.getQueue()} />, this.mountpoint);
+            queue={this.squareStore.getQueue()}
+            detachedSquares={this.squareStore.getDetachedSquares()}
+            grid={this.squareStore.getGrid()} />, this.mountpoint);
     }
 }

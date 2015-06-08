@@ -2,10 +2,12 @@ import Immutable from 'immutable'
 
 import BaseStore from './BaseStore.js'
 import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../misc/dimensions.js'
-import {INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../misc/actions.js'
-import {generateBlock, rowToY, yToRow} from '../misc/squareHelpers.js'
+import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../misc/actions.js'
+import {generateBlock, columnToX, rowToY, yToRow} from '../misc/squareHelpers.js'
 import Block from './squareStore/Block.js'
 import Queue from './squareStore/Queue.js'
+import Grid from './squareStore/Grid.js'
+import DetachedSquares from './squareStore/DetachedSquares.js'
 
 export default class SquareStore extends BaseStore {
 
@@ -16,15 +18,19 @@ export default class SquareStore extends BaseStore {
 
         this.block = new Block(state.cursor([SquareStore.name, 'block'], {}));
         this.queue = new Queue(state.cursor([SquareStore.name, 'queue'], {}));
+        this.grid = new Grid(state.cursor([SquareStore.name, 'grid'], {}));
+        this.detachedSquares = new DetachedSquares(state.cursor([SquareStore.name, 'detachedSquares'], {}));
     }
 
     handleAction({action, payload}) {
 
         /** Horizontally move the block, if allowed */
         const move = distance => {
-            const column = this.block.column + distance;
-            if (column >= 0 && column <= GRID_COLUMNS - 2) {
-                this.block.column = column;
+            const x = this.block.x + distance;
+            // Make sure there is space from both sides
+            if (this.grid.isFree({x: x, y: this.block.y + SQUARE_SIZE}) &&
+                this.grid.isFree({x: x + SQUARE_SIZE, y: this.block.y + SQUARE_SIZE})) {
+                this.block.move(x);
             }
         };
 
@@ -37,13 +43,35 @@ export default class SquareStore extends BaseStore {
 
         /** Main update function, called in every tick */
         const update = (time, gravity) => {
-            this.block.update(time, gravity);
-            if (this.block.y > GRID_HEIGHT) {
+            const {block, grid, detachedSquares} = this;
+
+            block.update(time, gravity);
+            if (!block.getFieldsBellow().every(field => grid.isFree(field))) {
+                block.decomposeToSquares().forEach(square => detachedSquares.add(square));
                 resetBlock();
+            }
+
+            detachedSquares.update(time, gravity);
+            detachedSquares.forEach(square => {
+                if (!grid.isFreeBellow(square)) {
+                    grid.add(square);
+                }
+            });
+            detachedSquares.filter(square => grid.isFree(square));
+
+            if (grid.count() > 0) {
+                console.log(grid.count());
             }
         };
 
         switch (action) {
+            case RESTART:
+                this.block.reset();
+                this.queue.reset();
+                this.grid.reset();
+                this.detachedSquares.reset();
+                break;
+
             case INIT_QUEUE:
                 payload.forEach(this.queue.enqueue.bind(this.queue));
                 resetBlock();
@@ -54,6 +82,18 @@ export default class SquareStore extends BaseStore {
                 break;
 
             case ROTATE_LEFT:
+                /*
+                for (let i = 0; i < 16; i++) {
+                    this.detachedSquares.add(new Immutable.Map({
+                        color: true,
+                        column: i,
+                        row: 0,
+                        x: columnToX(i),
+                        y: rowToY(0),
+                        speed: 0
+                    }));
+                }
+                */
                 this.block.rotate(-1);
                 break;
 
@@ -62,11 +102,11 @@ export default class SquareStore extends BaseStore {
                 break;
 
             case MOVE_LEFT:
-                move(-1);
+                move(-SQUARE_SIZE);
                 break;
 
             case MOVE_RIGHT:
-                move(1);
+                move(SQUARE_SIZE);
                 break;
 
             case UPDATE:
@@ -85,5 +125,13 @@ export default class SquareStore extends BaseStore {
 
     getQueue() {
         return this.queue.getData();
+    }
+
+    getDetachedSquares() {
+        return this.detachedSquares.getData();
+    }
+
+    getGrid() {
+        return this.grid.getData();
     }
 }

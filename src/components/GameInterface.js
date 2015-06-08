@@ -4,10 +4,12 @@ import PureComponent from './PureComponent.js'
 import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../misc/dimensions.js'
 
 import Move from './Move.js'
-import Grid from './Grid.js'
+import GridBackground from './GridBackground.js'
 import ScanLine from './ScanLine.js'
 import Block from './Block.js'
 import Queue from './Queue.js'
+import GridSquares from './GridSquares.js'
+import DetachedSquares from './DetachedSquares.js'
 
 export default class GameInterface extends PureComponent {
     render() {
@@ -27,7 +29,9 @@ export default class GameInterface extends PureComponent {
                 </Move>
 
                 <Move x={padding.horizontal} y={padding.vertical}>
-                    <Grid />
+                    <GridBackground />
+                    <GridSquares grid={this.props.grid} />
+                    <DetachedSquares detachedSquares={this.props.detachedSquares} />
                     <Block block={this.props.block} />
                     <ScanLine scanLine={this.props.scanLine} />
                 </Move>
