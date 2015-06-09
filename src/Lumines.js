@@ -10,8 +10,10 @@ import ConfigStore from './stores/ConfigStore.js'
 import GravityStore from './stores/GravityStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
 import SquareStore from './stores/SquareStore.js'
-import {range} from './misc/jshelpers.js'
+import {range, measureTime} from './misc/jshelpers.js'
 import {getRandomBlock} from './misc/squareHelpers.js'
+import Clock from './misc/Clock.js'
+import NumberHistory from './misc/NumberHistory.js'
 
 import {RESTART, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './misc/actions.js'
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN} from './misc/consts.js'
@@ -28,6 +30,9 @@ export default class Lumines {
         this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore);
         this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore, this.gravityStore);
 
+        this.fpsHistory = new NumberHistory(10);
+        this.updateTimeHistory = new NumberHistory(10);
+        this.renderTimeHistory = new NumberHistory(10);
         this.debug = debug('Game');
     }
 
@@ -56,7 +61,6 @@ export default class Lumines {
                     this.dispatch(DROP);
                     break;
             }
-            this.render();
         }, false);
 
         // Init game
@@ -64,21 +68,28 @@ export default class Lumines {
         this.dispatch(INIT_QUEUE, range(5).map(getRandomBlock));
 
         // Main game loop
-        let time = performance.now();
-        setInterval(() => {
+        const FPS = 15;
+        const clock = new Clock();
 
-            // To keep the flux cycle and the stores completely deterministic, we have to do any
-            // random stuff (like generating new blocks in this case) outside.
-            if (this.squareStore.getQueue().count() < 4) {
-                this.dispatch(REFILL_QUEUE, getRandomBlock());
-            }
+        const update = (time) => {
+            const elapsed = clock.next(time) / 1000;
+            this.fpsHistory.add(1 / elapsed);
 
-            this.dispatch(UPDATE, {time: (performance.now() - time) / 1000});
-            this.render();
-            time = performance.now();
+            this.updateTimeHistory.add(measureTime(() => {
+                // To keep the flux cycle and the stores completely deterministic, we have to do any
+                // random stuff (like generating new blocks in this case) outside.
+                if (this.squareStore.getQueue().count() < 4) {
+                    this.dispatch(REFILL_QUEUE, getRandomBlock());
+                }
 
-            // TODO: adjust fps
-        }, 1000/60);
+                this.dispatch(UPDATE, {time: elapsed});
+            }));
+
+            this.renderTimeHistory.add(measureTime(() => this.render()));
+
+            requestAnimationFrame(update);
+        };
+        requestAnimationFrame(update);
     }
 
     dispatch(action, payload) {
@@ -95,6 +106,11 @@ export default class Lumines {
             block={this.squareStore.getBlock()}
             queue={this.squareStore.getQueue()}
             detachedSquares={this.squareStore.getDetachedSquares()}
-            grid={this.squareStore.getGrid()} />, this.mountpoint);
+            grid={this.squareStore.getGrid()}
+            debug={{
+                fps: this.fpsHistory.average(), fpsMin: this.fpsHistory.min(),
+                update: this.updateTimeHistory.average(), updateMax: this.updateTimeHistory.max(),
+                render: this.renderTimeHistory.average(), renderMax: this.renderTimeHistory.max()
+            }}  />, this.mountpoint);
     }
 }

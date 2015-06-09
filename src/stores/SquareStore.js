@@ -58,10 +58,6 @@ export default class SquareStore extends BaseStore {
                 }
             });
             detachedSquares.filter(square => grid.isFree(square));
-
-            if (grid.count() > 0) {
-                console.log(grid.count());
-            }
         };
 
         switch (action) {
@@ -84,14 +80,12 @@ export default class SquareStore extends BaseStore {
             case ROTATE_LEFT:
                 /*
                 for (let i = 0; i < 16; i++) {
-                    this.detachedSquares.add(new Immutable.Map({
+                    this.detachedSquares.add({
                         color: true,
-                        column: i,
-                        row: 0,
                         x: columnToX(i),
                         y: rowToY(0),
                         speed: 0
-                    }));
+                    });
                 }
                 */
                 this.block.rotate(-1);

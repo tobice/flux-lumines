@@ -10,6 +10,7 @@ import Block from './Block.js'
 import Queue from './Queue.js'
 import GridSquares from './GridSquares.js'
 import DetachedSquares from './DetachedSquares.js'
+import DebugBar from './DebugBar.js'
 
 export default class GameInterface extends PureComponent {
     render() {
@@ -21,7 +22,7 @@ export default class GameInterface extends PureComponent {
         const height = GRID_HEIGHT + 2 * padding.vertical;
 
         return (
-            <svg viewBox={"0 0 " + width + " " + height}>
+            <svg viewBox={"0 0 " + width + " " + height} className="lumines">
                 <rect x={0} y={0} width={width} height={height} className="lumines-background" />
 
                 <Move x={SQUARE_SIZE / 2} y={3 * SQUARE_SIZE}>
@@ -34,6 +35,10 @@ export default class GameInterface extends PureComponent {
                     <DetachedSquares detachedSquares={this.props.detachedSquares} />
                     <Block block={this.props.block} />
                     <ScanLine scanLine={this.props.scanLine} />
+                </Move>
+
+                <Move x={width - 15} y={5}>
+                    <DebugBar {...this.props.debug} />
                 </Move>
             </svg>
         )
