@@ -1,7 +1,7 @@
 import {List} from 'immutable'
 
 import {range} from '../../misc/jshelpers.js'
-import {GRID_ROWS, GRID_COLUMNS} from '../../misc/dimensions.js'
+import {GRID_ROWS, GRID_COLUMNS, SQUARE_SIZE} from '../../misc/dimensions.js'
 import ImmutableDao from './ImmutableDao.js'
 
 export default class DetachedSquares extends ImmutableDao {
@@ -16,7 +16,8 @@ export default class DetachedSquares extends ImmutableDao {
 
     update(time, gravity) {
         this.cursor(squares => squares.map(square => {
-            square.y += square.speed * time;
+            // y shouldn't be change by more than SQUARE_SIZE to avoid square skipping
+            square.y += Math.min(square.speed * time, SQUARE_SIZE);
             square.speed += gravity * time;
             return square;
         }));

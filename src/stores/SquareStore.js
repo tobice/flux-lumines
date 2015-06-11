@@ -9,6 +9,7 @@ import Queue from './squareStore/Queue.js'
 import Grid from './squareStore/Grid.js'
 import DetachedSquares from './squareStore/DetachedSquares.js'
 
+
 export default class SquareStore extends BaseStore {
 
     constructor(dispatcher, state, configStore, gravityStore) {
@@ -44,13 +45,9 @@ export default class SquareStore extends BaseStore {
         /** Main update function, called in every tick */
         const update = (time, gravity) => {
             const {block, grid, detachedSquares} = this;
+            const squareCount = grid.count();
 
-            block.update(time, gravity);
-            if (!block.getFieldsBellow().every(field => grid.isFree(field))) {
-                block.decomposeToSquares().forEach(square => detachedSquares.add(square));
-                resetBlock();
-            }
-
+            // Update falling detached squares. Those that hit something, add to the grid.
             detachedSquares.update(time, gravity);
             detachedSquares.forEach(square => {
                 if (!grid.isFreeBellow(square)) {
@@ -58,6 +55,33 @@ export default class SquareStore extends BaseStore {
                 }
             });
             detachedSquares.filter(square => grid.isFree(square));
+
+            // Update the falling block. If it hits something, add it to the grid
+            block.update(time, gravity);
+            if (!block.getFieldsBellow().every(field => grid.isFree(field))) {
+                block.decomposeToSquares().reverse().forEach(square => {
+                    grid.isFreeBellow(square) ? detachedSquares.add(square) : grid.add(square);
+                });
+                resetBlock();
+            }
+
+
+            // Mark new column as scanned, count scanned monoblocks
+
+            // If we entered a new column and there are no monoblocks, explode all scanned
+            // monoblocks (remove appropriate squares from the grid).
+
+            // If the number of squares in the grid changed, update monoblocks
+            if (grid.count() != squareCount) { // this isn't very safe, what if I add 4 and remove 4?
+                grid.updateMonoblocks();
+            }
+
+            // if the number of attached squares changes:
+
+            // go through all squares from top left and check for monoblocks
+            // -> each square remembers coordinates of the monoblock it belongs to
+            // when I find a monoblock, I mark all squares to belong to the top left square
+            // when a square was a monoblock but no longer is, switch "scanned" to false
         };
 
         switch (action) {

@@ -40,7 +40,8 @@ export default class Block extends ImmutableDao {
 
     update(time, gravity) {
         this.cursor(block => block
-            .update('y', y => y + block.get('speed') * time)
+            // y shouldn't be change by more than SQUARE_SIZE to avoid square skipping
+            .update('y', y => y + Math.min(block.get('speed') * time, SQUARE_SIZE))
             .update('speed', speed =>
                 speed + gravity * time * block.get('dropped')));
     }
@@ -70,7 +71,9 @@ export default class Block extends ImmutableDao {
             x: x + getBlockSquareX(i),
             y: y + getBlockSquareY(i),
             color: color,
-            speed: this.speed / 3
+            speed: this.speed / 3,
+            scanned: false,
+            monoblock: null
         }));
     }
 }

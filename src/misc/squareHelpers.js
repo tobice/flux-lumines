@@ -2,13 +2,21 @@ import {GRID_COLUMNS, GRID_ROWS, GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from './d
 import {LIGHT, DARK} from './consts.js'
 import {range} from './jshelpers.js'
 
-export function getBlockSquareX(i) {
+export function getBlockSquareColumn(i) {
     // The squares go in the clockwise direction (it simplifies rotation).
-    return columnToX(i < 2 ? (i % 2) : 1 - (i % 2));
+    return i < 2 ? (i % 2) : 1 - (i % 2);
+}
+
+export function getBlockSquareRow(i) {
+    return Math.floor(i / 2);
+}
+
+export function getBlockSquareX(i) {
+    return columnToX(getBlockSquareColumn(i));
 }
 
 export function getBlockSquareY(i) {
-    return rowToY(Math.floor(i / 2));
+    return rowToY(getBlockSquareRow(i));
 }
 
 export function getRandomSquareColor() {
@@ -47,4 +55,14 @@ export function isOutOfRange({x, y}) {
     return !(
         0 <= x && x < GRID_WIDTH &&
         0 <= y && y < GRID_HEIGHT);
+}
+
+export function areOfTheSameColor(squares) {
+    let sum = squares.reduce((sum, square) => sum + square.color, 0);
+    return sum == 0 || sum == squares.length;
+}
+
+/** Return if given square is a monoblock, i. e. the monoblock pointer points on this very square */
+export function isMonoblock({x, y, monoblock}) {
+    return monoblock && monoblock.x == x && monoblock.y == y;
 }
