@@ -16,6 +16,9 @@ export default class GridSquares extends PureComponent {
                 {squares.filter(square => isMonoblock(square)).reverse().map((square, i) =>
                     <Monoblock key={i} color={square.color} x={square.x} y={square.y} />
                 )}
+                {squares.filter(square => square.scanned).map((square, i) =>
+                        <Square key={i} color={square.color} x={square.x} y={square.y} scanned />
+                )}
             </g>
         )
     }

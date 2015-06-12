@@ -28,7 +28,8 @@ export default class Lumines {
         this.configStore = new ConfigStore(this.dispatcher, this.state);
         this.gravityStore = new GravityStore(this.dispatcher, this.state, this.configStore);
         this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore);
-        this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore, this.gravityStore);
+        this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore,
+            this.gravityStore, this.scanLineStore);
 
         this.fpsHistory = new NumberHistory(10);
         this.updateTimeHistory = new NumberHistory(10);
@@ -68,11 +69,9 @@ export default class Lumines {
         this.dispatch(INIT_QUEUE, range(5).map(getRandomBlock));
 
         // Main game loop
-        const FPS = 15;
         const clock = new Clock();
-
         const update = (time) => {
-            const elapsed = clock.next(time) / 1000;
+            let elapsed = clock.next(time) / 1000;
             this.fpsHistory.add(1 / elapsed);
 
             this.updateTimeHistory.add(measureTime(() => {

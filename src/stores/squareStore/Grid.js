@@ -82,6 +82,21 @@ export default class Grid extends ImmutableDao {
         }));
     }
 
+    scanColumn(column) {
+        let scanned = 0;
+        this.cursor(grid => grid.updateIn([column], squares =>
+            squares.map(square => {
+                if (square && square.monoblock) {
+                    square.scanned = true;
+                    scanned++;
+                }
+                return square;
+            })
+        ));
+
+        return scanned;
+    }
+
     count() {
         return this.cursor().flatten().filter(square => square != null).count();
     }

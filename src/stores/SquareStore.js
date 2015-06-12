@@ -12,10 +12,11 @@ import DetachedSquares from './squareStore/DetachedSquares.js'
 
 export default class SquareStore extends BaseStore {
 
-    constructor(dispatcher, state, configStore, gravityStore) {
-        super(dispatcher, [gravityStore]);
+    constructor(dispatcher, state, configStore, gravityStore, scanLineStore) {
+        super(dispatcher, [gravityStore, scanLineStore]);
         this.configStore = configStore;
         this.gravityStore = gravityStore;
+        this.scanLineStore = scanLineStore;
 
         this.block = new Block(state.cursor([SquareStore.name, 'block'], {}));
         this.queue = new Queue(state.cursor([SquareStore.name, 'queue'], {}));
@@ -65,8 +66,12 @@ export default class SquareStore extends BaseStore {
                 resetBlock();
             }
 
-
             // Mark new column as scanned, count scanned monoblocks
+            if (this.scanLineStore.enteredNewColumn) {
+                let scanned = grid.scanColumn(this.scanLineStore.column);
+
+                console.log(scanned);
+            }
 
             // If we entered a new column and there are no monoblocks, explode all scanned
             // monoblocks (remove appropriate squares from the grid).
