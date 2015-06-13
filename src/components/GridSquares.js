@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {isMonoblock} from '../misc/squareHelpers.js'
+import {isMonoblock} from '../game/squareHelpers.js'
 import PureComponent from './PureComponent.js'
 import Square from './Square.js'
 import Monoblock from './Monoblock.js'

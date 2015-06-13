@@ -2,7 +2,7 @@ import React from 'react'
 import classNames from 'classnames'
 
 import PureComponent from './PureComponent.js'
-import {SQUARE_SIZE} from '../misc/dimensions.js'
+import {SQUARE_SIZE} from '../game/dimensions.js'
 
 export default class Square extends PureComponent {
     render() {

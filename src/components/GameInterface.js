@@ -1,7 +1,7 @@
 import React from 'react'
 
 import PureComponent from './PureComponent.js'
-import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../misc/dimensions.js'
+import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../game/dimensions.js'
 
 import Move from './Move.js'
 import GridBackground from './GridBackground.js'

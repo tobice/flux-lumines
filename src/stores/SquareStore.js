@@ -1,9 +1,9 @@
 import Immutable from 'immutable'
 
 import BaseStore from './BaseStore.js'
-import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../misc/dimensions.js'
-import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../misc/actions.js'
-import {generateBlock, columnToX, rowToY, yToRow} from '../misc/squareHelpers.js'
+import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../game/dimensions.js'
+import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
+import {generateBlock, columnToX, rowToY, yToRow} from '../game/squareHelpers.js'
 import Block from './squareStore/Block.js'
 import Queue from './squareStore/Queue.js'
 import Grid from './squareStore/Grid.js'

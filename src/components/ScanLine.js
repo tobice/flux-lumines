@@ -1,7 +1,7 @@
 import React from 'react'
 
 import PureComponent from './PureComponent.js'
-import {SQUARE_SIZE, SCAN_LINE_WIDTH, GRID_HEIGHT} from '../misc/dimensions.js'
+import {SQUARE_SIZE, SCAN_LINE_WIDTH, GRID_HEIGHT} from '../game/dimensions.js'
 
 export default class ScanLine extends PureComponent {
     render() {

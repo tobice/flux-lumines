@@ -1,7 +1,7 @@
 import React from 'react'
 
 import PureComponent from './PureComponent.js'
-import {SQUARE_SIZE} from '../misc/dimensions.js'
+import {SQUARE_SIZE} from '../game/dimensions.js'
 
 export default class Monoblock extends PureComponent {
     render() {

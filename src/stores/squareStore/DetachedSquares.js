@@ -1,7 +1,7 @@
 import {List} from 'immutable'
 
 import {range} from '../../misc/jshelpers.js'
-import {GRID_ROWS, GRID_COLUMNS, SQUARE_SIZE} from '../../misc/dimensions.js'
+import {GRID_ROWS, GRID_COLUMNS, SQUARE_SIZE} from '../../game/dimensions.js'
 import ImmutableDao from './ImmutableDao.js'
 
 export default class DetachedSquares extends ImmutableDao {

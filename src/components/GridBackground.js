@@ -1,7 +1,7 @@
 import React from 'react'
 
 import PureComponent from './PureComponent.js'
-import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../misc/dimensions.js'
+import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../game/dimensions.js'
 import {range} from '../misc/jshelpers.js'
 
 export default class GridBackground extends PureComponent {

@@ -1,6 +1,6 @@
 import {GRID_COLUMNS, GRID_ROWS, GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from './dimensions.js'
 import {LIGHT, DARK} from './consts.js'
-import {range} from './jshelpers.js'
+import {range} from './../misc/jshelpers.js'
 
 export function getBlockSquareColumn(i) {
     // The squares go in the clockwise direction (it simplifies rotation).

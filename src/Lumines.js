@@ -11,12 +11,12 @@ import GravityStore from './stores/GravityStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
 import SquareStore from './stores/SquareStore.js'
 import {range, measureTime} from './misc/jshelpers.js'
-import {getRandomBlock} from './misc/squareHelpers.js'
+import {getRandomBlock} from './game/squareHelpers.js'
 import Clock from './misc/Clock.js'
 import NumberHistory from './misc/NumberHistory.js'
 
-import {RESTART, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './misc/actions.js'
-import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN} from './misc/consts.js'
+import {RESTART, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './game/actions.js'
+import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN} from './game/consts.js'
 
 export default class Lumines {
 

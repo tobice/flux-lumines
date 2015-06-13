@@ -1,6 +1,6 @@
 import Immutable from 'immutable'
 
-import DefaultConfig from '../misc/DefaultConfig.js'
+import DefaultConfig from '../game/DefaultConfig.js'
 import BaseStore from './BaseStore.js'
 
 export default class ConfigStore extends BaseStore {

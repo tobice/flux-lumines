@@ -1,7 +1,7 @@
 import BaseStore from './BaseStore.js'
-import dimensions from '../misc/dimensions.js'
-import {UPDATE} from '../misc/actions.js'
-import {xToColumn} from '../misc/squareHelpers.js'
+import dimensions from '../game/dimensions.js'
+import {UPDATE} from '../game/actions.js'
+import {xToColumn} from '../game/squareHelpers.js'
 
 export default class ScanLineStore extends BaseStore {
 

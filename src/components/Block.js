@@ -2,8 +2,8 @@ import React from 'react'
 
 import PureComponent from './PureComponent.js'
 import Square from './Square.js'
-import {SQUARE_SIZE} from '../misc/dimensions.js'
-import {getBlockSquareX, getBlockSquareY, columnToX, yToRow} from '../misc/squareHelpers.js'
+import {SQUARE_SIZE} from '../game/dimensions.js'
+import {getBlockSquareX, getBlockSquareY, columnToX, yToRow} from '../game/squareHelpers.js'
 
 export default class Block extends PureComponent {
     render() {
