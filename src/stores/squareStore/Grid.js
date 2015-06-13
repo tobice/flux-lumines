@@ -33,6 +33,10 @@ export default class Grid extends ImmutableDao {
         return this.isFree({x: x, y: y + SQUARE_SIZE});
     }
 
+    /**
+     * Update the grid and make sure that nothing but 4 square blocks of the same color are marked
+     * as monoblocks.
+     */
     updateMonoblocks() {
         this.cursor(grid => grid.withMutations(grid => {
 
@@ -44,7 +48,6 @@ export default class Grid extends ImmutableDao {
             }
 
             function createMonoBlock(monoblock, squares) {
-                console.log('Creating monoblock ' + monoblock.toString());
                 squares.forEach(({x, y}) =>
                     grid.updateIn([xToColumn(x), yToRow(y)], square => {
                         square.monoblock = monoblock;
@@ -55,10 +58,13 @@ export default class Grid extends ImmutableDao {
             function removeMonoBlock(monoblock, squares) {
                 squares.forEach(({x, y}) =>
                     grid.updateIn([xToColumn(x), yToRow(y)], square => {
+                        // Remove all squares from the monoblock.
                         // I can remove the monoblock pointer only when it points to this
                         // very monoblock. The square might be part of another monoblock
                         // in which case I should leave it.
-                        if (square.monoblock && square.monoblock.x == monoblock.x && square.monoblock.y == monoblock.y) {
+                        if (square.monoblock
+                            && square.monoblock.x == monoblock.x
+                            && square.monoblock.y == monoblock.y) {
                             square.monoblock = null;
                             square.scanned = false;
                         }
@@ -71,9 +77,8 @@ export default class Grid extends ImmutableDao {
             grid.flatten().filter(square => square != null).forEach(square => {
                 let monoblock = {x: square.x, y: square.y};
                 let squares = getSquaresInBlock(monoblock);
-                if (squares.length != 4) return;
 
-                if (areOfTheSameColor(squares)) {
+                if (squares.length == 4 && areOfTheSameColor(squares)) {
                     createMonoBlock(monoblock, squares);
                 } else {
                     removeMonoBlock(monoblock, squares);
@@ -82,19 +87,56 @@ export default class Grid extends ImmutableDao {
         }));
     }
 
+    /**
+     * Mark all monoblocks in the column as scanned. Return list of scanned squares.
+     * @param {int} column
+     * @returns {Array}
+     */
     scanColumn(column) {
-        let scanned = 0;
+        let scanned = [];
         this.cursor(grid => grid.updateIn([column], squares =>
             squares.map(square => {
                 if (square && square.monoblock) {
                     square.scanned = true;
-                    scanned++;
+                    scanned.push(square);
                 }
                 return square;
             })
         ));
 
         return scanned;
+    }
+
+    /**
+     * Locate and remove all scanned squares. Squares above scanned squares are also removed from
+     * the grid (they are 'detached'). Lists of removed and detached squares are returned.
+     * @returns {{removed: Array, detached: Array}}
+     */
+    removeScannedMonoblocks() {
+        let removed = [], detached = [];
+
+        this.cursor(grid => grid.withMutations(grid => {
+            // Cycle column by column, from bottom up, to identify all squares that should be
+            // removed or detached in a single run.
+            grid.forEach((squares, column) =>
+                squares.filter(square => square).reverse().forEach(square => {
+                    let row = yToRow(square.y);
+
+                    // Remove scanned
+                    if (square.scanned) {
+                        removed.push(square);
+                        grid.setIn([column, row], null);
+                    }
+                    // Detach those that have nothing bellow (the square bellow was removed)
+                    else if (grid.getIn([column, row + 1]) === null) {
+                        detached.push(square);
+                        grid.setIn([column, row], null);
+                    }
+                })
+            );
+        }));
+
+        return {removed, detached};
     }
 
     count() {

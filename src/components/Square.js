@@ -1,11 +1,12 @@
-import React from 'react/addons'
+import React from 'react'
+import classNames from 'classnames'
 
 import PureComponent from './PureComponent.js'
 import {SQUARE_SIZE} from '../misc/dimensions.js'
 
 export default class Square extends PureComponent {
     render() {
-        let classes = React.addons.classSet({
+        let classes = classNames({
             'lumines-square': true,
             'lumines-square-dark': this.props.color,
             'lumines-square-light': !this.props.color,

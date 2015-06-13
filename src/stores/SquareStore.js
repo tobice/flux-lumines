@@ -45,17 +45,18 @@ export default class SquareStore extends BaseStore {
 
         /** Main update function, called in every tick */
         const update = (time, gravity) => {
-            const {block, grid, detachedSquares} = this;
-            const squareCount = grid.count();
+            const {block, grid, detachedSquares, scanLineStore} = this;
+            let dirty = false;
 
             // Update falling detached squares. Those that hit something, add to the grid.
             detachedSquares.update(time, gravity);
             detachedSquares.forEach(square => {
                 if (!grid.isFreeBellow(square)) {
                     grid.add(square);
+                    dirty = true;
                 }
             });
-            detachedSquares.filter(square => grid.isFree(square));
+            detachedSquares.filter(square => grid.isFree(square)); // remove those added to grid
 
             // Update the falling block. If it hits something, add it to the grid
             block.update(time, gravity);
@@ -64,29 +65,29 @@ export default class SquareStore extends BaseStore {
                     grid.isFreeBellow(square) ? detachedSquares.add(square) : grid.add(square);
                 });
                 resetBlock();
+                dirty = true;
             }
 
-            // Mark new column as scanned, count scanned monoblocks
-            if (this.scanLineStore.enteredNewColumn) {
-                let scanned = grid.scanColumn(this.scanLineStore.column);
+            // If we entered a new column, mark the column as scanned
+            if (scanLineStore.enteredNewColumn) {
+                let scanned = grid.scanColumn(scanLineStore.column);
 
-                console.log(scanned);
+                // If no squares were scanned, we are no longer extending the area of scanned
+                // monoblocks, and we should remove all that has been scanned until now.
+                if (scanned.length == 0) {
+                    let {removed, detached} = grid.removeScannedMonoblocks();
+                    detached.forEach(square => detachedSquares.add(square));
+
+                    if (removed.length > 0) {
+                        dirty = true;
+                    }
+                }
             }
 
-            // If we entered a new column and there are no monoblocks, explode all scanned
-            // monoblocks (remove appropriate squares from the grid).
-
-            // If the number of squares in the grid changed, update monoblocks
-            if (grid.count() != squareCount) { // this isn't very safe, what if I add 4 and remove 4?
+            // If changes to grid have been made, update the monoblocks on the grid
+            if (dirty) {
                 grid.updateMonoblocks();
             }
-
-            // if the number of attached squares changes:
-
-            // go through all squares from top left and check for monoblocks
-            // -> each square remembers coordinates of the monoblock it belongs to
-            // when I find a monoblock, I mark all squares to belong to the top left square
-            // when a square was a monoblock but no longer is, switch "scanned" to false
         };
 
         switch (action) {
@@ -107,16 +108,6 @@ export default class SquareStore extends BaseStore {
                 break;
 
             case ROTATE_LEFT:
-                /*
-                for (let i = 0; i < 16; i++) {
-                    this.detachedSquares.add({
-                        color: true,
-                        x: columnToX(i),
-                        y: rowToY(0),
-                        speed: 0
-                    });
-                }
-                */
                 this.block.rotate(-1);
                 break;
 
