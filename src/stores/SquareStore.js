@@ -3,6 +3,7 @@ import Immutable from 'immutable'
 import BaseStore from './BaseStore.js'
 import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../game/dimensions.js'
 import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
+import {PLAYING} from '../game/gameStates.js'
 import {generateBlock, columnToX, rowToY, yToRow} from '../game/squareHelpers.js'
 import Block from './squareStore/Block.js'
 import Queue from './squareStore/Queue.js'
@@ -12,9 +13,10 @@ import DetachedSquares from './squareStore/DetachedSquares.js'
 
 export default class SquareStore extends BaseStore {
 
-    constructor(dispatcher, state, configStore, gravityStore, scanLineStore) {
-        super(dispatcher, [gravityStore, scanLineStore]);
+    constructor(dispatcher, state, configStore, gameStateStore, gravityStore, scanLineStore) {
+        super(dispatcher, [gameStateStore, gravityStore, scanLineStore]);
         this.configStore = configStore;
+        this.gameStateStore = gameStateStore;
         this.gravityStore = gravityStore;
         this.scanLineStore = scanLineStore;
 
@@ -89,6 +91,9 @@ export default class SquareStore extends BaseStore {
                 grid.updateMonoblocks();
             }
         };
+
+        if (this.gameStateStore.state != PLAYING &&
+            [RESTART, INIT_QUEUE, REFILL_QUEUE].indexOf(action) == -1) return;
 
         switch (action) {
             case RESTART:

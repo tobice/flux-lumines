@@ -6,7 +6,6 @@ export default {
     MOVE_RIGHT: 'MOVE_RIGHT',
     DROP: 'DROP',
     PAUSE: 'PAUSE',
-    RESUME: 'RESUME',
     RESTART: 'RESTART',
     INIT_QUEUE: 'INIT_QUEUE',
     REFILL_QUEUE: 'REFILL_QUEUE'

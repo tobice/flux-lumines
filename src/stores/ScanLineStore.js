@@ -1,12 +1,14 @@
 import BaseStore from './BaseStore.js'
 import dimensions from '../game/dimensions.js'
 import {UPDATE} from '../game/actions.js'
+import {PLAYING} from '../game/gameStates.js'
 import {xToColumn} from '../game/squareHelpers.js'
 
 export default class ScanLineStore extends BaseStore {
 
-    constructor(dispatcher, state, configStore) {
-        super(dispatcher);
+    constructor(dispatcher, state, configStore, gameStateStore) {
+        super(dispatcher, [gameStateStore]);
+        this.gameStateStore = gameStateStore;
 
         this.cursor = state.cursor([ScanLineStore.name], {
             position: 0,
@@ -16,6 +18,8 @@ export default class ScanLineStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
+        if (this.gameStateStore.state != PLAYING) return;
+
         switch (action) {
             case UPDATE:
                 this.cursor(scanline => scanline.withMutations(scanline => {

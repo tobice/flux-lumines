@@ -8,6 +8,7 @@ import State from './misc/State.js'
 import GameInterface from './components/GameInterface.js'
 import ConfigStore from './stores/ConfigStore.js'
 import GravityStore from './stores/GravityStore.js'
+import GameStateStore from './stores/GameStateStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
 import SquareStore from './stores/SquareStore.js'
 import {range, measureTime} from './misc/jshelpers.js'
@@ -15,8 +16,8 @@ import {getRandomBlock} from './game/squareHelpers.js'
 import Clock from './misc/Clock.js'
 import NumberHistory from './misc/NumberHistory.js'
 
-import {RESTART, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './game/actions.js'
-import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN} from './game/consts.js'
+import {RESTART, PAUSE,UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './game/actions.js'
+import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC} from './game/consts.js'
 
 export default class Lumines {
 
@@ -26,10 +27,12 @@ export default class Lumines {
         this.dispatcher = new Dispatcher();
 
         this.configStore = new ConfigStore(this.dispatcher, this.state);
+        this.gameStateStore = new GameStateStore(this.dispatcher, this.state);
         this.gravityStore = new GravityStore(this.dispatcher, this.state, this.configStore);
-        this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore);
+        this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore,
+            this.gameStateStore);
         this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore,
-            this.gravityStore, this.scanLineStore);
+            this.gameStateStore, this.gravityStore, this.scanLineStore);
 
         this.fpsHistory = new NumberHistory(10);
         this.updateTimeHistory = new NumberHistory(10);
@@ -61,7 +64,12 @@ export default class Lumines {
                 case KEY_DOWN:
                     this.dispatch(DROP);
                     break;
+
+                case KEY_ESC:
+                    this.dispatch(PAUSE);
+                    break;
             }
+
         }, false);
 
         // Init game
