@@ -12,25 +12,26 @@ import Queue from './Queue.js'
 import GridSquares from './GridSquares.js'
 import DetachedSquares from './DetachedSquares.js'
 import DebugBar from './DebugBar.js'
+import HudPanel from './HudPanel.js'
 
 export default class GameInterface extends PureComponent {
     render() {
-        const padding = {
-            vertical: SQUARE_SIZE,
-            horizontal: 3 * SQUARE_SIZE
-        };
-        const width = GRID_WIDTH + 2 * padding.horizontal;
-        const height = GRID_HEIGHT + 2 * padding.vertical;
+        let GUTTER = SQUARE_SIZE / 2,
+            QUEUE_WIDTH = SQUARE_SIZE * 2,
+            HUD_PANEL_WIDTH = SQUARE_SIZE * 3;
+
+        let width = GUTTER + QUEUE_WIDTH + GUTTER + GRID_WIDTH + GUTTER + HUD_PANEL_WIDTH + GUTTER,
+            height = GUTTER + GRID_HEIGHT + GUTTER;
 
         return (
             <svg viewBox={"0 0 " + width + " " + height} className="lumines">
                 <rect x={0} y={0} width={width} height={height} className="lumines-background" />
 
-                <Move x={SQUARE_SIZE / 2} y={3 * SQUARE_SIZE}>
+                <Move x={GUTTER} y={GUTTER + 2 * SQUARE_SIZE}>
                     <Queue queue={this.props.queue} />
                 </Move>
 
-                <Move x={padding.horizontal} y={padding.vertical}>
+                <Move x={GUTTER + QUEUE_WIDTH + GUTTER} y={GUTTER}>
                     <GridBackground />
                     <GridSquares grid={this.props.grid} />
                     <DetachedSquares detachedSquares={this.props.detachedSquares} />
@@ -41,8 +42,12 @@ export default class GameInterface extends PureComponent {
                     </g>}
                 </Move>
 
-                <Move x={width - 15} y={5}>
+                <Move x={width - GUTTER - HUD_PANEL_WIDTH} y={GUTTER}>
                     <DebugBar {...this.props.debug} />
+                </Move>
+
+                <Move x={width - GUTTER - HUD_PANEL_WIDTH} y={GUTTER + 2 * SQUARE_SIZE}>
+                    <HudPanel />
                 </Move>
             </svg>
         )
