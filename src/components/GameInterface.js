@@ -2,6 +2,7 @@ import React from 'react'
 
 import PureComponent from './PureComponent.js'
 import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../game/dimensions.js'
+import {WELCOME} from '../game/gameStates.js'
 
 import Move from './Move.js'
 import GridBackground from './GridBackground.js'
@@ -33,8 +34,11 @@ export default class GameInterface extends PureComponent {
                     <GridBackground />
                     <GridSquares grid={this.props.grid} />
                     <DetachedSquares detachedSquares={this.props.detachedSquares} />
-                    <Block block={this.props.block} />
-                    <ScanLine scanLine={this.props.scanLine} />
+
+                    {this.props.state != WELCOME && <g>
+                        <Block block={this.props.block} />
+                        <ScanLine scanLine={this.props.scanLine} />
+                    </g>}
                 </Move>
 
                 <Move x={width - 15} y={5}>

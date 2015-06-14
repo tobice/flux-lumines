@@ -17,7 +17,7 @@ import Clock from './misc/Clock.js'
 import NumberHistory from './misc/NumberHistory.js'
 
 import {RESTART, PAUSE,UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './game/actions.js'
-import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC} from './game/consts.js'
+import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js'
 
 export default class Lumines {
 
@@ -68,12 +68,14 @@ export default class Lumines {
                 case KEY_ESC:
                     this.dispatch(PAUSE);
                     break;
-            }
 
+                case KEY_R:
+                    this.dispatch(RESTART);
+                    break;
+            }
         }, false);
 
         // Init game
-        this.dispatch(RESTART);
         this.dispatch(INIT_QUEUE, range(5).map(getRandomBlock));
 
         // Main game loop
@@ -110,6 +112,7 @@ export default class Lumines {
     render() {
         React.render(<GameInterface
             scanLine={this.scanLineStore.scanLine}
+            state={this.gameStateStore.state}
             block={this.squareStore.getBlock()}
             queue={this.squareStore.getQueue()}
             detachedSquares={this.squareStore.getDetachedSquares()}

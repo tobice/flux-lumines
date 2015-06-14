@@ -97,7 +97,7 @@ export default class SquareStore extends BaseStore {
 
         switch (action) {
             case RESTART:
-                this.block.reset();
+                resetBlock();
                 this.queue.reset();
                 this.grid.reset();
                 this.detachedSquares.reset();

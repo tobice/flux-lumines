@@ -1,6 +1,6 @@
 import Immutable from 'immutable'
 
-import {OVER, PAUSED, PLAYING} from '../game/gameStates.js'
+import {WELCOME, OVER, PAUSED, PLAYING} from '../game/gameStates.js'
 import {UPDATE, RESTART, PAUSE} from '../game/actions.js'
 import BaseStore from './BaseStore.js'
 
@@ -11,7 +11,7 @@ export default class GameStateStore extends BaseStore {
         super(dispatcher);
 
         this.cursor = state.cursor([GameStateStore.name], {
-            state: OVER
+            state: WELCOME
         });
     }
 
