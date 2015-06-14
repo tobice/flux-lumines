@@ -24,6 +24,9 @@ export default class SquareStore extends BaseStore {
         this.queue = new Queue(state.cursor([SquareStore.name, 'queue'], {}));
         this.grid = new Grid(state.cursor([SquareStore.name, 'grid'], {}));
         this.detachedSquares = new DetachedSquares(state.cursor([SquareStore.name, 'detachedSquares'], {}));
+
+        // To be temporary exposed during a cycle.
+        this.removedSquares = [];
     }
 
     handleAction({action, payload}) {
@@ -82,6 +85,7 @@ export default class SquareStore extends BaseStore {
 
                     if (removed.length > 0) {
                         dirty = true;
+                        this.removedSquares = removed;
                     }
                 }
             }
@@ -92,6 +96,10 @@ export default class SquareStore extends BaseStore {
             }
         };
 
+        // Reset temporary variables
+        this.removedSquares = [];
+
+        // Allow certain actions only when the game is on
         if (this.gameStateStore.state != PLAYING &&
             [RESTART, INIT_QUEUE, REFILL_QUEUE].indexOf(action) == -1) return;
 
@@ -152,5 +160,9 @@ export default class SquareStore extends BaseStore {
 
     getGrid() {
         return this.grid.getData();
+    }
+
+    isGridTopReached() {
+        return this.grid.isTopReached();
     }
 }

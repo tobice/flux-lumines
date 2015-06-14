@@ -12,6 +12,7 @@ import GameStateStore from './stores/GameStateStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
 import SquareStore from './stores/SquareStore.js'
 import TimeStore from './stores/TimeStore.js'
+import ScoreStore from './stores/ScoreStore.js'
 import {range, measureTime} from './misc/jshelpers.js'
 import {getRandomBlock} from './game/squareHelpers.js'
 import Clock from './misc/Clock.js'
@@ -31,12 +32,13 @@ export default class Lumines {
         let {dispatcher, state} = this;
         this.configStore = new ConfigStore(dispatcher, state);
         this.gameStateStore = new GameStateStore(dispatcher, state);
+        this.timeStore = new TimeStore(dispatcher, state, this.gameStateStore);
         this.gravityStore = new GravityStore(dispatcher, state, this.configStore);
         this.scanLineStore = new ScanLineStore(dispatcher, state, this.configStore,
             this.gameStateStore);
         this.squareStore = new SquareStore(dispatcher, state, this.configStore,
             this.gameStateStore, this.gravityStore, this.scanLineStore);
-        this.timeStore = new TimeStore(dispatcher, state, this.gameStateStore);
+        this.scoreStore = new ScoreStore(dispatcher, state, this.configStore, this.squareStore);
 
         this.fpsHistory = new NumberHistory(10);
         this.updateTimeHistory = new NumberHistory(10);
@@ -122,7 +124,8 @@ export default class Lumines {
             detachedSquares={this.squareStore.getDetachedSquares()}
             grid={this.squareStore.getGrid()}
             hud={{
-                elapsed: this.timeStore.elapsedFormat
+                elapsed: this.timeStore.elapsedFormat,
+                score: this.scoreStore.hudScore
             }}
             debug={{
                 fps: this.fpsHistory.average(), fpsMin: this.fpsHistory.min(),

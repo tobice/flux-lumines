@@ -142,4 +142,9 @@ export default class Grid extends ImmutableDao {
     count() {
         return this.cursor().flatten().filter(square => square != null).count();
     }
+
+    isTopReached() {
+        // Load second row and look for squares
+        return this.cursor().map(squares => squares.get(1)).some();
+    }
 }

@@ -23,4 +23,8 @@ export default class ConfigStore extends BaseStore {
     get baseGravity() {
         return this.cursor().get('baseGravity');
     }
+
+    get hudScoreUpdateDuration() {
+        return this.cursor().get('hudScoreUpdateDuration');
+    }
 }
