@@ -11,6 +11,7 @@ import GravityStore from './stores/GravityStore.js'
 import GameStateStore from './stores/GameStateStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
 import SquareStore from './stores/SquareStore.js'
+import TimeStore from './stores/TimeStore.js'
 import {range, measureTime} from './misc/jshelpers.js'
 import {getRandomBlock} from './game/squareHelpers.js'
 import Clock from './misc/Clock.js'
@@ -26,13 +27,16 @@ export default class Lumines {
         this.state = new State();
         this.dispatcher = new Dispatcher();
 
-        this.configStore = new ConfigStore(this.dispatcher, this.state);
-        this.gameStateStore = new GameStateStore(this.dispatcher, this.state);
-        this.gravityStore = new GravityStore(this.dispatcher, this.state, this.configStore);
-        this.scanLineStore = new ScanLineStore(this.dispatcher, this.state, this.configStore,
+        // TODO: load config from constructor
+        let {dispatcher, state} = this;
+        this.configStore = new ConfigStore(dispatcher, state);
+        this.gameStateStore = new GameStateStore(dispatcher, state);
+        this.gravityStore = new GravityStore(dispatcher, state, this.configStore);
+        this.scanLineStore = new ScanLineStore(dispatcher, state, this.configStore,
             this.gameStateStore);
-        this.squareStore = new SquareStore(this.dispatcher, this.state, this.configStore,
+        this.squareStore = new SquareStore(dispatcher, state, this.configStore,
             this.gameStateStore, this.gravityStore, this.scanLineStore);
+        this.timeStore = new TimeStore(dispatcher, state, this.gameStateStore);
 
         this.fpsHistory = new NumberHistory(10);
         this.updateTimeHistory = new NumberHistory(10);
@@ -117,6 +121,9 @@ export default class Lumines {
             queue={this.squareStore.getQueue()}
             detachedSquares={this.squareStore.getDetachedSquares()}
             grid={this.squareStore.getGrid()}
+            hud={{
+                elapsed: this.timeStore.elapsedFormat
+            }}
             debug={{
                 fps: this.fpsHistory.average(), fpsMin: this.fpsHistory.min(),
                 update: this.updateTimeHistory.average(), updateMax: this.updateTimeHistory.max(),

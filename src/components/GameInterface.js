@@ -47,7 +47,7 @@ export default class GameInterface extends PureComponent {
                 </Move>
 
                 <Move x={width - GUTTER - HUD_PANEL_WIDTH} y={GUTTER + 2 * SQUARE_SIZE}>
-                    <HudPanel />
+                    <HudPanel {...this.props.hud} />
                 </Move>
             </svg>
         )

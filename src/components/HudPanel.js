@@ -8,7 +8,7 @@ export default class HudPanel extends PureComponent {
         let HUD_HEIGHT = 18;
         return (
             <g className="lumines-hud-panel">
-                <Hud label="Time" value="34:12" />
+                <Hud label="Time" value={this.props.elapsed} />
                 <Move x={0} y={HUD_HEIGHT}>
                     <Hud label="Score" value="2,134" />
                 </Move>
