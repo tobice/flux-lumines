@@ -5,8 +5,8 @@ import BaseStore from './BaseStore.js'
 
 export default class ConfigStore extends BaseStore {
 
-    constructor(dispatcher, state) {
-        super(dispatcher);
+    constructor(dispatcher, state, stores) {
+        super(dispatcher, stores);
         this.cursor = state.cursor([ConfigStore.name], new DefaultConfig({}));
     }
 

@@ -7,8 +7,8 @@ import BaseStore from './BaseStore.js'
 /** Current game state */
 export default class GameStateStore extends BaseStore {
 
-    constructor(dispatcher, state) {
-        super(dispatcher);
+    constructor(dispatcher, state, stores) {
+        super(dispatcher, stores);
 
         this.cursor = state.cursor([GameStateStore.name], {
             state: WELCOME

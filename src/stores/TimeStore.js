@@ -6,9 +6,8 @@ import BaseStore from './BaseStore.js'
 
 export default class TimeStore extends BaseStore {
 
-    constructor(dispatcher, state, gameStateStore) {
-        super(dispatcher, [gameStateStore]);
-        this.gameStateStore = gameStateStore;
+    constructor(dispatcher, state, stores) {
+        super(dispatcher, stores);
 
         this.cursor = state.cursor([TimeStore.name], {
             elapsed: 0
@@ -16,19 +15,20 @@ export default class TimeStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
+        let {gameStateStore} = this.stores;
 
         const setElapsed = (elapsed) =>
             this.cursor(store => store.set('elapsed', elapsed));
 
         switch (action) {
-            case UPDATE:
-                if (this.gameStateStore.state == PLAYING) {
-                    setElapsed(this.elapsed + payload.time);
-                }
-                break;
-
             case RESTART:
                 setElapsed(0);
+                break;
+
+            case UPDATE:
+                if (gameStateStore.state == PLAYING) {
+                    setElapsed(this.elapsed + payload.time);
+                }
                 break;
         }
     }

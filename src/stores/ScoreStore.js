@@ -3,10 +3,8 @@ import {UPDATE, RESTART} from '../game/actions.js'
 
 export default class ScoreStore extends BaseStore {
 
-    constructor(dispatcher, state, configStore, squareStore) {
-        super(dispatcher, [squareStore]);
-        this.squareStore = squareStore;
-        this.configStore = configStore;
+    constructor(dispatcher, state, stores) {
+        super(dispatcher, stores);
 
         this.cursor = state.cursor([ScoreStore.name], {
             score: 0,
@@ -16,9 +14,9 @@ export default class ScoreStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
+        let {configStore, squareStore} = this.stores;
 
         // Private methods
-
         const setScore = (score) => this.cursor(store => store.set('score', score));
         const setSpeed = (speed) => this.cursor(store => store.set('speed', speed));
         const setHudScore = (score) => this.cursor(store => store.set('hudScore', score));
@@ -29,11 +27,14 @@ export default class ScoreStore extends BaseStore {
             case RESTART:
                 setScore(0);
                 setHudScore(0);
+                setSpeed(0);
                 break;
+
             case UPDATE:
-                if (this.squareStore.removedSquares.length > 0) {
-                    setScore(this.score + countScore(this.squareStore.removedSquares));
-                    setSpeed((this.score - this.hudScore) / this.configStore.hudScoreUpdateDuration);
+                this.waitFor([squareStore]);
+                if (squareStore.removedSquares.length > 0) {
+                    setScore(this.score + countScore(squareStore.removedSquares));
+                    setSpeed((this.score - this.hudScore) /configStore.hudScoreUpdateDuration);
                 }
 
                 // Increase the hud score until it catches up with the real score

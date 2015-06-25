@@ -27,18 +27,18 @@ export default class Lumines {
         this.mountpoint = mountpoint;
         this.state = new State();
         this.dispatcher = new Dispatcher();
+        this.stores = {};
 
         // TODO: load config from constructor
-        let {dispatcher, state} = this;
-        this.configStore = new ConfigStore(dispatcher, state);
-        this.gameStateStore = new GameStateStore(dispatcher, state);
-        this.timeStore = new TimeStore(dispatcher, state, this.gameStateStore);
-        this.gravityStore = new GravityStore(dispatcher, state, this.configStore);
-        this.scanLineStore = new ScanLineStore(dispatcher, state, this.configStore,
-            this.gameStateStore);
-        this.squareStore = new SquareStore(dispatcher, state, this.configStore,
-            this.gameStateStore, this.gravityStore, this.scanLineStore);
-        this.scoreStore = new ScoreStore(dispatcher, state, this.configStore, this.squareStore);
+        let {dispatcher, state, stores} = this;
+
+        stores.configStore = new ConfigStore(dispatcher, state, stores);
+        stores.gameStateStore = new GameStateStore(dispatcher, state, stores);
+        stores.timeStore = new TimeStore(dispatcher, state, stores);
+        stores.gravityStore = new GravityStore(dispatcher, state, stores);
+        stores.scanLineStore = new ScanLineStore(dispatcher, state, stores);
+        stores.squareStore = new SquareStore(dispatcher, state, stores);
+        stores.scoreStore = new ScoreStore(dispatcher, state, stores);
 
         this.fpsHistory = new NumberHistory(10);
         this.updateTimeHistory = new NumberHistory(10);
@@ -93,7 +93,7 @@ export default class Lumines {
             this.updateTimeHistory.add(measureTime(() => {
                 // To keep the flux cycle and the stores completely deterministic, we have to do any
                 // random stuff (like generating new blocks in this case) outside.
-                if (this.squareStore.getQueue().count() < 4) {
+                if (this.stores.squareStore.getQueue().count() < 4) {
                     this.dispatch(REFILL_QUEUE, getRandomBlock());
                 }
 
@@ -116,21 +116,24 @@ export default class Lumines {
     }
 
     render() {
+        let {scanLineStore, gameStateStore, squareStore, timeStore, scoreStore} = this.stores;
+        let {fpsHistory, updateTimeHistory, renderTimeHistory} = this;
+
         React.render(<GameInterface
-            scanLine={this.scanLineStore.scanLine}
-            state={this.gameStateStore.state}
-            block={this.squareStore.getBlock()}
-            queue={this.squareStore.getQueue()}
-            detachedSquares={this.squareStore.getDetachedSquares()}
-            grid={this.squareStore.getGrid()}
+            scanLine={scanLineStore.scanLine}
+            state={gameStateStore.state}
+            block={squareStore.getBlock()}
+            queue={squareStore.getQueue()}
+            detachedSquares={squareStore.getDetachedSquares()}
+            grid={squareStore.getGrid()}
             hud={{
-                elapsed: this.timeStore.elapsedFormat,
-                score: this.scoreStore.hudScore
+                elapsed: timeStore.elapsedFormat,
+                score: scoreStore.hudScore
             }}
             debug={{
-                fps: this.fpsHistory.average(), fpsMin: this.fpsHistory.min(),
-                update: this.updateTimeHistory.average(), updateMax: this.updateTimeHistory.max(),
-                render: this.renderTimeHistory.average(), renderMax: this.renderTimeHistory.max()
-            }}  />, this.mountpoint);
+                fps: fpsHistory.average(), fpsMin: fpsHistory.min(),
+                update: updateTimeHistory.average(), updateMax: updateTimeHistory.max(),
+                render: renderTimeHistory.average(), renderMax: renderTimeHistory.max()
+            }} />, this.mountpoint);
     }
 }

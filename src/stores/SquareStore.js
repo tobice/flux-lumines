@@ -13,12 +13,8 @@ import DetachedSquares from './squareStore/DetachedSquares.js'
 
 export default class SquareStore extends BaseStore {
 
-    constructor(dispatcher, state, configStore, gameStateStore, gravityStore, scanLineStore) {
-        super(dispatcher, [gameStateStore, gravityStore, scanLineStore]);
-        this.configStore = configStore;
-        this.gameStateStore = gameStateStore;
-        this.gravityStore = gravityStore;
-        this.scanLineStore = scanLineStore;
+    constructor(dispatcher, state, stores) {
+        super(dispatcher, stores);
 
         this.block = new Block(state.cursor([SquareStore.name, 'block'], {}));
         this.queue = new Queue(state.cursor([SquareStore.name, 'queue'], {}));
@@ -30,6 +26,7 @@ export default class SquareStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
+        let {configStore, gameStateStore, gravityStore, scanLineStore} = this.stores;
 
         /** Horizontally move the block, if allowed */
         const move = distance => {
@@ -43,15 +40,18 @@ export default class SquareStore extends BaseStore {
 
         /** Pop new block from the queue and add it to the top of the grid */
         const resetBlock = () => {
-            const speed = this.configStore.baseBlockSpeed + this.gravityStore.gravity / 50;
+            this.waitFor([gravityStore]);
+            const speed = configStore.baseBlockSpeed + gravityStore.gravity / 50;
             const squares = this.queue.dequeue();
             this.block.reset(speed, squares);
         };
 
         /** Main update function, called in every tick */
         const update = (time, gravity) => {
-            const {block, grid, detachedSquares, scanLineStore} = this;
+            const {block, grid, detachedSquares} = this;
             let dirty = false;
+
+            this.waitFor([gravityStore, scanLineStore]);
 
             // Update falling detached squares. Those that hit something, add to the grid.
             detachedSquares.update(time, gravity);
@@ -100,7 +100,7 @@ export default class SquareStore extends BaseStore {
         this.removedSquares = [];
 
         // Allow certain actions only when the game is on
-        if (this.gameStateStore.state != PLAYING &&
+        if (gameStateStore.state != PLAYING &&
             [RESTART, INIT_QUEUE, REFILL_QUEUE].indexOf(action) == -1) return;
 
         switch (action) {
@@ -137,7 +137,7 @@ export default class SquareStore extends BaseStore {
                 break;
 
             case UPDATE:
-                update(payload.time, this.gravityStore.gravity);
+                update(payload.time, gravityStore.gravity);
                 break;
 
             case DROP:
