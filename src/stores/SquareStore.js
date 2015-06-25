@@ -5,8 +5,6 @@ import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../game/dimensions.js'
 import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
 import {PLAYING} from '../game/gameStates.js'
 import {generateBlock, columnToX, rowToY, yToRow} from '../game/squareHelpers.js'
-import Block from './squareStore/Block.js'
-import Queue from './squareStore/Queue.js'
 import Grid from './squareStore/Grid.js'
 import DetachedSquares from './squareStore/DetachedSquares.js'
 
@@ -16,8 +14,6 @@ export default class SquareStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.block = new Block(state.cursor([SquareStore.name, 'block'], {}));
-        this.queue = new Queue(state.cursor([SquareStore.name, 'queue'], {}));
         this.grid = new Grid(state.cursor([SquareStore.name, 'grid'], {}));
         this.detachedSquares = new DetachedSquares(state.cursor([SquareStore.name, 'detachedSquares'], {}));
 
@@ -26,32 +22,13 @@ export default class SquareStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
-        let {configStore, gameStateStore, gravityStore, scanLineStore} = this.stores;
+        let {gameStateStore, gravityStore, scanLineStore, blockStore} = this.stores;
 
-        /** Horizontally move the block, if allowed */
-        const move = distance => {
-            const x = this.block.x + distance;
-            // Make sure there is space from both sides
-            if (this.grid.isFree({x: x, y: this.block.y + SQUARE_SIZE}) &&
-                this.grid.isFree({x: x + SQUARE_SIZE, y: this.block.y + SQUARE_SIZE})) {
-                this.block.move(x);
-            }
-        };
-
-        /** Pop new block from the queue and add it to the top of the grid */
-        const resetBlock = () => {
-            this.waitFor([gravityStore]);
-            const speed = configStore.baseBlockSpeed + gravityStore.gravity / 50;
-            const squares = this.queue.dequeue();
-            this.block.reset(speed, squares);
-        };
-
-        /** Main update function, called in every tick */
         const update = (time, gravity) => {
-            const {block, grid, detachedSquares} = this;
+            this.waitFor([gravityStore, scanLineStore, blockStore]);
+            const {grid, detachedSquares} = this;
             let dirty = false;
-
-            this.waitFor([gravityStore, scanLineStore]);
+            this.removedSquares = [];
 
             // Update falling detached squares. Those that hit something, add to the grid.
             detachedSquares.update(time, gravity);
@@ -63,13 +40,11 @@ export default class SquareStore extends BaseStore {
             });
             detachedSquares.filter(square => grid.isFree(square)); // remove those added to grid
 
-            // Update the falling block. If it hits something, add it to the grid
-            block.update(time, gravity);
-            if (!block.getFieldsBellow().every(field => grid.isFree(field))) {
-                block.decomposeToSquares().reverse().forEach(square => {
+            // Check the falling block. If it hit something and got decomposed, add to the grid
+            if (blockStore.decomposedSquares.count() > 0) {
+                blockStore.decomposedSquares.reverse().forEach(square => {
                     grid.isFreeBellow(square) ? detachedSquares.add(square) : grid.add(square);
                 });
-                resetBlock();
                 dirty = true;
             }
 
@@ -90,68 +65,33 @@ export default class SquareStore extends BaseStore {
                 }
             }
 
-            // If changes to grid have been made, update the monoblocks on the grid
+            // If any changes have been made to the grid, update the monoblocks
             if (dirty) {
                 grid.updateMonoblocks();
             }
         };
 
-        // Reset temporary variables
-        this.removedSquares = [];
-
-        // Allow certain actions only when the game is on
-        if (gameStateStore.state != PLAYING &&
-            [RESTART, INIT_QUEUE, REFILL_QUEUE].indexOf(action) == -1) return;
 
         switch (action) {
             case RESTART:
-                resetBlock();
-                this.queue.reset();
                 this.grid.reset();
                 this.detachedSquares.reset();
                 break;
 
-            case INIT_QUEUE:
-                payload.forEach(this.queue.enqueue.bind(this.queue));
-                resetBlock();
-                break;
-
-            case REFILL_QUEUE:
-                this.queue.enqueue(payload);
-                break;
-
-            case ROTATE_LEFT:
-                this.block.rotate(-1);
-                break;
-
-            case ROTATE_RIGHT:
-                this.block.rotate(1);
-                break;
-
-            case MOVE_LEFT:
-                move(-SQUARE_SIZE);
-                break;
-
-            case MOVE_RIGHT:
-                move(SQUARE_SIZE);
-                break;
-
             case UPDATE:
-                update(payload.time, gravityStore.gravity);
-                break;
-
-            case DROP:
-                this.block.drop();
+                if (gameStateStore.state == PLAYING) {
+                    update(payload.time, gravityStore.gravity);
+                }
                 break;
         }
     }
 
-    getBlock() {
-        return this.block.getData();
+    isFree({x, y}) {
+        return this.grid.isFree({x, y});
     }
 
-    getQueue() {
-        return this.queue.getData();
+    isFreeBellow({x, y}) {
+        return this.grid.isFreeBellow({x, y});
     }
 
     getDetachedSquares() {

@@ -10,6 +10,7 @@ import ConfigStore from './stores/ConfigStore.js'
 import GravityStore from './stores/GravityStore.js'
 import GameStateStore from './stores/GameStateStore.js'
 import ScanLineStore from './stores/ScanLineStore.js'
+import BlockStore from './stores/BlockStore.js'
 import SquareStore from './stores/SquareStore.js'
 import TimeStore from './stores/TimeStore.js'
 import ScoreStore from './stores/ScoreStore.js'
@@ -37,6 +38,7 @@ export default class Lumines {
         stores.timeStore = new TimeStore(dispatcher, state, stores);
         stores.gravityStore = new GravityStore(dispatcher, state, stores);
         stores.scanLineStore = new ScanLineStore(dispatcher, state, stores);
+        stores.blockStore = new BlockStore(dispatcher, state, stores);
         stores.squareStore = new SquareStore(dispatcher, state, stores);
         stores.scoreStore = new ScoreStore(dispatcher, state, stores);
 
@@ -93,7 +95,7 @@ export default class Lumines {
             this.updateTimeHistory.add(measureTime(() => {
                 // To keep the flux cycle and the stores completely deterministic, we have to do any
                 // random stuff (like generating new blocks in this case) outside.
-                if (this.stores.squareStore.getQueue().count() < 4) {
+                if (this.stores.blockStore.getQueue().count() < 4) {
                     this.dispatch(REFILL_QUEUE, getRandomBlock());
                 }
 
@@ -116,14 +118,14 @@ export default class Lumines {
     }
 
     render() {
-        let {scanLineStore, gameStateStore, squareStore, timeStore, scoreStore} = this.stores;
+        let {scanLineStore, gameStateStore, squareStore, blockStore, timeStore, scoreStore} = this.stores;
         let {fpsHistory, updateTimeHistory, renderTimeHistory} = this;
 
         React.render(<GameInterface
             scanLine={scanLineStore.scanLine}
             state={gameStateStore.state}
-            block={squareStore.getBlock()}
-            queue={squareStore.getQueue()}
+            block={blockStore.getBlock()}
+            queue={blockStore.getQueue()}
             detachedSquares={squareStore.getDetachedSquares()}
             grid={squareStore.getGrid()}
             hud={{
