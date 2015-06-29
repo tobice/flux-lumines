@@ -16,12 +16,17 @@ export default class GameStateStore extends BaseStore {
     }
 
     handleAction({action}) {
+        let {squareStore} = this.stores;
 
         const setState = (state) =>
             this.cursor(store => store.set('state', state));
 
         switch (action) {
             case UPDATE:
+                this.waitFor([squareStore]);
+                if (squareStore.isGridTopReached()) {
+                    setState(OVER);
+                }
                 break;
 
             case PAUSE:
