@@ -1,8 +1,8 @@
 import {List} from 'immutable'
 
 import BaseStore from './BaseStore.js'
-import Block from './squareStore/Block.js'
-import Queue from './squareStore/Queue.js'
+import Block from '../daos/Block.js'
+import Queue from '../daos/Queue.js'
 import {PLAYING} from '../game/gameStates.js'
 import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
 import {SQUARE_SIZE} from '../game/dimensions.js'

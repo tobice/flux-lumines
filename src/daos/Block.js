@@ -1,9 +1,9 @@
 import {Map, List} from 'immutable'
 
 import ImmutableDao from './ImmutableDao.js'
-import {GRID_COLUMNS, SQUARE_SIZE} from '../../game/dimensions.js'
-import {range} from '../../misc/jshelpers.js'
-import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, randomSquareColor} from '../../game/squareHelpers.js'
+import {GRID_COLUMNS, SQUARE_SIZE} from '../game/dimensions.js'
+import {range} from '../misc/jshelpers.js'
+import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, randomSquareColor} from '../game/squareHelpers.js'
 
 export default class Block extends ImmutableDao {
 

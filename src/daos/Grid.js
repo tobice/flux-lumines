@@ -1,8 +1,8 @@
 import {List} from 'immutable'
 
-import {range} from '../../misc/jshelpers.js'
-import {isOutOfRange, xToColumn, yToRow, normalizeX, normalizeY, getBlockSquareColumn, getBlockSquareRow, areOfTheSameColor} from '../../game/squareHelpers.js'
-import {SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../../game/dimensions.js'
+import {range} from '../misc/jshelpers.js'
+import {isOutOfRange, xToColumn, yToRow, normalizeX, normalizeY, getBlockSquareColumn, getBlockSquareRow, areOfTheSameColor} from '../game/squareHelpers.js'
+import {SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../game/dimensions.js'
 import ImmutableDao from './ImmutableDao.js'
 
 /** Queue of blocks */

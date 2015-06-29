@@ -34,7 +34,7 @@ export default class ScoreStore extends BaseStore {
                 this.waitFor([squareStore]);
                 if (squareStore.removedSquares.length > 0) {
                     setScore(this.score + countScore(squareStore.removedSquares));
-                    setSpeed((this.score - this.hudScore) /configStore.hudScoreUpdateDuration);
+                    setSpeed((this.score - this.hudScore) / configStore.hudScoreUpdateDuration);
                 }
 
                 // Increase the hud score until it catches up with the real score
