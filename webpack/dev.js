@@ -5,7 +5,7 @@ module.exports = {
     module: {
         loaders: [
             {test: /\.js$/, exclude: /node_modules/, loaders: ['react-hot', 'babel-loader']},
-            {test: /\.less$/, loader: 'style!css!less'}
+            {test: /\.less$/, loader: 'style!css!less!autoprefixer-loader'}
         ]
     },
     output: {

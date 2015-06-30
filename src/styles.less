@@ -1,10 +1,16 @@
 @import url(http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&subset=latin,latin-ext);
+
+@bg: #313131;
+@blue: #3daee6;
+
 body {
-    // background-color: #353535;
-    background-color: #313131;
+    background-color: @bg;
 }
 .lumines text {
     font-family: "Roboto Condensed", "Helvetica Neue", sans-serif;
+}
+.lumines-text-colored {
+    fill: @blue;
 }
 .lumines-background {
     fill: #313131;
@@ -22,7 +28,7 @@ body {
     fill: #fafafa;
 }
 .lumines-square-dark {
-    fill: #3daee6;
+    fill: @blue;
 }
 .lumines-square-scanned {
     fill: #5a5a5a;
@@ -35,7 +41,7 @@ body {
     dominant-baseline: hanging;
 }
 .lumines-hud-label {
-    fill: #3daee6;
+    fill: @blue;
     font-size: 5px;
 }
 .lumines-hud-value {
@@ -51,4 +57,44 @@ body {
 }
 .lumines-monoblock-dark {
     fill: #38a2d6;
+}
+
+@keyframes fadein {
+    0% { opacity: 0; }
+    100% { opacity: 0.9; }
+}
+.lumines-overlay {
+    fill: @bg;
+    opacity: 0.9;
+    animation: fadein ease 0.3s;
+}
+.lumines-overlay-label {
+    fill: white;
+    dominant-baseline: hanging;
+    text-anchor: middle;
+    font-size: 10px;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.5; }
+}
+.lumines-overlay-message {
+    fill: white;
+    text-anchor: middle;
+    font-size: 4px;
+    text-transform: uppercase;
+    animation: pulse 1s ease infinite;
+}
+.lumines-control-key {
+    fill: @blue;
+    text-anchor: start;
+    text-transform: uppercase;
+    font-size: 2.5px;
+}
+.lumines-control-legend {
+    fill: white;
+    font-size: 3px;
+    text-anchor: end;
 }

@@ -24,6 +24,7 @@
     "react-pure-render": "^1.0.1"
   },
   "devDependencies": {
+    "autoprefixer-loader": "^2.0.0",
     "babel": "^4.0.1",
     "babel-core": "^4.0.1",
     "babel-loader": "^4.0.0",
