@@ -2,7 +2,8 @@ import React from 'react'
 
 import PureComponent from './PureComponent.js'
 import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../game/dimensions.js'
-import {WELCOME, PLAYING} from '../game/gameStates.js'
+import {WELCOME, PLAYING, PAUSED, OVER} from '../game/gameStates.js'
+import {formatNumber} from '../misc/jshelpers.js'
 
 import Move from './Move.js'
 import GridBackground from './GridBackground.js'
@@ -23,6 +24,9 @@ export default class GameInterface extends PureComponent {
 
         let width = GUTTER + QUEUE_WIDTH + GUTTER + GRID_WIDTH + GUTTER + HUD_PANEL_WIDTH + GUTTER,
             height = GUTTER + GRID_HEIGHT + GUTTER;
+
+        let overlayWidth = width,
+            overlayHeight = 6 * SQUARE_SIZE;
 
         let {state} = this.props;
 
@@ -53,14 +57,32 @@ export default class GameInterface extends PureComponent {
                     <HudPanel {...this.props.hud} />
                 </Move>
 
-                {state != PLAYING &&
                 <Move x={0} y={3 * SQUARE_SIZE}>
-                    <Overlay width={width} height={6 * SQUARE_SIZE}
-                             show={state != PLAYING}
-                             label="Welcome to Lumines">
+                    {state == WELCOME &&
+                    <Overlay width={overlayWidth} height={overlayHeight} label="Welcome to Lumines">
+                        <tspan>Press </tspan>
+                        <tspan className="lumines-text-colored">R</tspan>
+                        <tspan> to start the game</tspan>
                     </Overlay>
+                    }
+
+                    {state == PAUSED &&
+                    <Overlay width={overlayWidth} height={overlayHeight} label="Game paused">
+                        <tspan>Press </tspan>
+                        <tspan className="lumines-text-colored">Esc</tspan>
+                        <tspan> to continue the game</tspan>
+                    </Overlay>
+                    }
+
+                    {state == OVER &&
+                    <Overlay width={overlayWidth} height={overlayHeight}
+                        label={"Game over. Your score is " + formatNumber(this.props.hud.score)}>
+                        <tspan>Press </tspan>
+                        <tspan className="lumines-text-colored">R</tspan>
+                        <tspan> to restart the game</tspan>
+                    </Overlay>
+                    }
                 </Move>
-                }
             </svg>
         )
     }
