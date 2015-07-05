@@ -39,6 +39,12 @@ export default class TimeStore extends BaseStore {
 
     get elapsedFormat() {
         let date = new Date(this.elapsed * 1000);
-        return date.toTimeString().replace(/.*(\d{2}:\d{2}).*/, "$1");
+        return date.toTimeString().replace(/.*(\d{2}:\d{2}).*/, '$1');
+    }
+
+    get color() {
+        let colors = ['blue', 'red', 'green', 'orange', 'yellow', 'teal'];
+        // Change the color scheme every 60 seconds
+        return colors[(Math.floor(this.elapsed / 60) % colors.length)];
     }
 }

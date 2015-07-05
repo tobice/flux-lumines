@@ -128,6 +128,7 @@ export default class Lumines {
             queue={blockStore.getQueue()}
             detachedSquares={squareStore.getDetachedSquares()}
             grid={squareStore.getGrid()}
+            color={timeStore.color}
             hud={{
                 elapsed: timeStore.elapsedFormat,
                 score: scoreStore.hudScore

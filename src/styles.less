@@ -1,21 +1,16 @@
 @import url(http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&subset=latin,latin-ext);
 
 @bg: #313131;
-@blue: #3daee6;
 
-body {
-    background-color: @bg;
-}
 .lumines text {
     font-family: "Roboto Condensed", "Helvetica Neue", sans-serif;
 }
-.lumines-text-colored {
-    fill: @blue;
-}
 .lumines-background {
-    fill: #313131;
+    fill: @bg;
     stroke: 0;
 }
+
+/** Square grid */
 .lumines-grid line {
     stroke: #5a5a5a;
     stroke-width: 0.3;
@@ -24,41 +19,32 @@ body {
     stroke: #313131;
     stroke-width: 0.1;
 }
-.lumines-square-light {
-    fill: #fafafa;
+.lumines-monoblock {
+    stroke: white;
+    stroke-width: 0.7;
 }
-.lumines-square-dark {
-    fill: @blue;
+
+/** Hud panel */
+.lumines-hud text {
+    dominant-baseline: hanging;
 }
-.lumines-square-scanned {
-    fill: #5a5a5a;
+.lumines-hud-label {
+    font-size: 5px;
+}
+.lumines-hud-value {
+    font-size: 7px;
 }
 .lumines-debug-bar text {
     font-size: 2px;
     fill: #5a5a5a;
 }
-.lumines-hud text {
-    dominant-baseline: hanging;
-}
-.lumines-hud-label {
-    fill: @blue;
-    font-size: 5px;
-}
-.lumines-hud-value {
-    fill: #fafafa;
-    font-size: 7px;
-}
-.lumines-monoblock {
-    stroke: white;
-    stroke-width: 0.7;
-}
-.lumines-monoblock-light {
-    fill: #dedede;
-}
-.lumines-monoblock-dark {
-    fill: #38a2d6;
-}
 
+/** Game overlay */
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.5; }
+}
 @keyframes fadein {
     0% { opacity: 0; }
     100% { opacity: 0.9; }
@@ -74,12 +60,6 @@ body {
     text-anchor: middle;
     font-size: 10px;
 }
-
-@keyframes pulse {
-    0% { opacity: 0.5; }
-    50% { opacity: 0.9; }
-    100% { opacity: 0.5; }
-}
 .lumines-overlay-message {
     fill: white;
     text-anchor: middle;
@@ -87,8 +67,9 @@ body {
     text-transform: uppercase;
     animation: pulse 1s ease infinite;
 }
+
+/** Controls */
 .lumines-control-key {
-    fill: @blue;
     text-anchor: start;
     text-transform: uppercase;
     font-size: 2.5px;
@@ -97,4 +78,54 @@ body {
     fill: white;
     font-size: 3px;
     text-anchor: end;
+}
+
+/** Color scheme template */
+.color-scheme(@dark, @light: #fafafa) {
+    .lumines-text-colored {
+        fill: @dark;
+    }
+    .lumines-square-light {
+        fill: @light;
+    }
+    .lumines-square-dark {
+        fill: @dark;
+    }
+    .lumines-square-scanned {
+        fill: #5a5a5a;
+    }
+    .lumines-hud-value {
+        fill: @light;
+    }
+    .lumines-hud-label {
+        fill: @dark;
+    }
+    .lumines-monoblock-light {
+        fill: darken(@light, 15%);
+    }
+    .lumines-monoblock-dark {
+        fill: darken(@dark, 10%);
+    }
+    .lumines-control-key {
+        fill: @dark;
+    }
+}
+
+.lumines-blue {
+    .color-scheme(#3daee6);
+}
+.lumines-red {
+    .color-scheme(#f83447);
+}
+.lumines-green {
+    .color-scheme(#52A573);
+}
+.lumines-orange {
+    .color-scheme(#DA6E43);
+}
+.lumines-yellow {
+    .color-scheme(#FFE263);
+}
+.lumines-teal {
+    .color-scheme(#028E85);
 }

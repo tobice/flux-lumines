@@ -31,7 +31,7 @@ export default class GameInterface extends PureComponent {
         let {state} = this.props;
 
         return (
-            <svg viewBox={"0 0 " + width + " " + height} className="lumines">
+            <svg viewBox={"0 0 " + width + " " + height} className={"lumines lumines-" + this.props.color}>
                 <rect x={0} y={0} width={width} height={height} className="lumines-background" />
 
                 <Move x={GUTTER} y={GUTTER + 2 * SQUARE_SIZE}>
