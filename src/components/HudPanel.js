@@ -15,7 +15,7 @@ export default class HudPanel extends PureComponent {
                     <Hud label="Score" value={formatNumber(this.props.score)} />
                 </Move>
                 <Move x={0} y={HUD_HEIGHT * 2}>
-                    <Hud label="High score" value="52,134" />
+                    <Hud label="High score" value={formatNumber(this.props.highScore)} />
                 </Move>
             </g>
         );

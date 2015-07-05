@@ -1,5 +1,6 @@
 import BaseStore from './BaseStore.js'
 import {UPDATE, RESTART} from '../game/actions.js'
+import {OVER} from '../game/gameStates.js'
 
 export default class ScoreStore extends BaseStore {
 
@@ -14,7 +15,7 @@ export default class ScoreStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
-        let {configStore, squareStore} = this.stores;
+        let {configStore, squareStore, gameStateStore} = this.stores;
 
         // Private methods
         const setScore = (score) => this.cursor(store => store.set('score', score));
@@ -41,6 +42,13 @@ export default class ScoreStore extends BaseStore {
                 if (this.hudScore < this.score) {
                     setHudScore(Math.min(this.hudScore + payload.time * this.speed, this.score));
                 }
+
+                // Remember the high score
+                if (gameStateStore.state == OVER) {
+                    if (this.score > (Number(localStorage.highScore) || 0)) {
+                        localStorage.highScore = this.score;
+                    }
+                }
                 break;
         }
     }
@@ -55,5 +63,9 @@ export default class ScoreStore extends BaseStore {
 
     get hudScore() {
         return Math.round(this.cursor().get('hudScore'));
+    }
+
+    get highScore() {
+        return Math.max(Number(localStorage.highScore) || 0, this.hudScore);
     }
 }

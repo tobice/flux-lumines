@@ -131,7 +131,8 @@ export default class Lumines {
             color={timeStore.color}
             hud={{
                 elapsed: timeStore.elapsedFormat,
-                score: scoreStore.hudScore
+                score: scoreStore.hudScore,
+                highScore: scoreStore.highScore
             }}
             debug={{
                 fps: fpsHistory.average(), fpsMin: fpsHistory.min(),
