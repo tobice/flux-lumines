@@ -19,7 +19,7 @@ import {getRandomBlock} from './game/squareHelpers.js'
 import Clock from './misc/Clock.js'
 import NumberHistory from './misc/NumberHistory.js'
 
-import {RESTART, PAUSE,UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, INIT_QUEUE, REFILL_QUEUE} from './game/actions.js'
+import {RESTART, PAUSE,UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, REFILL_QUEUE} from './game/actions.js'
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js'
 
 export default class Lumines {
@@ -82,9 +82,6 @@ export default class Lumines {
             }
         }, false);
 
-        // Init game
-        this.dispatch(INIT_QUEUE, range(5).map(getRandomBlock));
-
         // Main game loop
         const clock = new Clock();
         const update = (time) => {
@@ -94,7 +91,7 @@ export default class Lumines {
             this.updateTimeHistory.add(measureTime(() => {
                 // To keep the flux cycle and the stores completely deterministic, we have to do any
                 // random stuff (like generating new blocks in this case) outside.
-                if (this.stores.blockStore.getQueue().count() < 4) {
+                while (this.stores.blockStore.getQueue().count() < 4) {
                     this.dispatch(REFILL_QUEUE, getRandomBlock());
                 }
 

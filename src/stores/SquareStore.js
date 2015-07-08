@@ -2,7 +2,7 @@ import Immutable from 'immutable'
 
 import BaseStore from './BaseStore.js'
 import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../game/dimensions.js'
-import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
+import {RESTART, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
 import {PLAYING} from '../game/gameStates.js'
 import {generateBlock, columnToX, rowToY, yToRow} from '../game/squareHelpers.js'
 import Grid from '../daos/Grid.js'

@@ -4,7 +4,7 @@ import BaseStore from './BaseStore.js'
 import Block from '../daos/Block.js'
 import Queue from '../daos/Queue.js'
 import {PLAYING} from '../game/gameStates.js'
-import {RESTART, INIT_QUEUE, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
+import {RESTART, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
 import {SQUARE_SIZE} from '../game/dimensions.js'
 
 export default class BlockStore extends BaseStore {
@@ -50,17 +50,12 @@ export default class BlockStore extends BaseStore {
 
         // Allow certain actions only when the game is on
         if (gameStateStore.state != PLAYING &&
-            [RESTART, INIT_QUEUE, REFILL_QUEUE].indexOf(action) == -1) return;
+            [RESTART, REFILL_QUEUE].indexOf(action) == -1) return;
 
         switch (action) {
             case RESTART:
                 resetBlock();
                 this.queue.reset();
-                break;
-
-            case INIT_QUEUE:
-                payload.forEach(squares => this.queue.enqueue(squares));
-                resetBlock();
                 break;
 
             case REFILL_QUEUE:

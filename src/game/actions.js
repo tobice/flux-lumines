@@ -7,6 +7,5 @@ export default {
     DROP: 'DROP',
     PAUSE: 'PAUSE',
     RESTART: 'RESTART',
-    INIT_QUEUE: 'INIT_QUEUE',
     REFILL_QUEUE: 'REFILL_QUEUE'
 }
