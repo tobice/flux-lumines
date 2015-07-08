@@ -5,9 +5,9 @@ import BaseStore from './BaseStore.js'
 
 export default class ConfigStore extends BaseStore {
 
-    constructor(dispatcher, state, stores) {
+    constructor(dispatcher, state, stores, config) {
         super(dispatcher, stores);
-        this.cursor = state.cursor([ConfigStore.name], new DefaultConfig({}));
+        this.cursor = state.cursor([ConfigStore.name], new DefaultConfig(config));
     }
 
     handleAction() {  }

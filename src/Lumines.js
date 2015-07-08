@@ -24,16 +24,15 @@ import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} fro
 
 export default class Lumines {
 
-    constructor(mountpoint) {
+    constructor(mountpoint, config) {
         this.mountpoint = mountpoint;
         this.state = new State();
         this.dispatcher = new Dispatcher();
         this.stores = {};
 
-        // TODO: load config from constructor
         let {dispatcher, state, stores} = this;
 
-        stores.configStore = new ConfigStore(dispatcher, state, stores);
+        stores.configStore = new ConfigStore(dispatcher, state, stores, config);
         stores.gameStateStore = new GameStateStore(dispatcher, state, stores);
         stores.timeStore = new TimeStore(dispatcher, state, stores);
         stores.gravityStore = new GravityStore(dispatcher, state, stores);
