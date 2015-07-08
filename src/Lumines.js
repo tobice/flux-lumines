@@ -118,7 +118,7 @@ export default class Lumines {
     }
 
     render() {
-        let {scanLineStore, gameStateStore, squareStore, blockStore, timeStore, scoreStore} = this.stores;
+        let {scanLineStore, gameStateStore, squareStore, blockStore, timeStore, scoreStore, gravityStore} = this.stores;
         let {fpsHistory, updateTimeHistory, renderTimeHistory} = this;
 
         React.render(<GameInterface
@@ -137,7 +137,8 @@ export default class Lumines {
             debug={{
                 fps: fpsHistory.average(), fpsMin: fpsHistory.min(),
                 update: updateTimeHistory.average(), updateMax: updateTimeHistory.max(),
-                render: renderTimeHistory.average(), renderMax: renderTimeHistory.max()
+                render: renderTimeHistory.average(), renderMax: renderTimeHistory.max(),
+                gravity: gravityStore.gravity
             }} />, this.mountpoint);
     }
 }

@@ -1,6 +1,7 @@
 import Immutable from 'immutable'
 
 import {RESTART, UPDATE} from '../game/actions.js'
+import {PLAYING} from '../game/gameStates.js'
 import BaseStore from './BaseStore.js'
 
 /** Current game gravity. Pretty much determines game speed. Increases over time */
@@ -14,8 +15,8 @@ export default class GravityStore extends BaseStore {
         });
     }
 
-    handleAction({action}) {
-        let {configStore} = this.stores;
+    handleAction({action, payload}) {
+        let {configStore, gameStateStore} = this.stores;
 
         switch (action) {
             case RESTART:
@@ -23,7 +24,12 @@ export default class GravityStore extends BaseStore {
                 break;
 
             case UPDATE:
-                // TODO: increase over time
+                if (gameStateStore.state == PLAYING) {
+                    // The gravity will increase linearly by the base gravity every two minutes
+                    // (i. e. after two minutes of playing the gravity will be twice as strong).
+                    this.cursor(store => store.update('gravity', gravity =>
+                        gravity + (payload.time * configStore.baseGravity) / 60 / 2 ));
+                }
                 break;
         }
     }
