@@ -10,12 +10,12 @@ export default class Queue extends PureComponent {
         const gap = SQUARE_SIZE / 2;
         return (
             <g className="queue">
-                {this.props.queue.take(3).map((squares, j) =>
+                {this.props.queue.take(3).map((block, j) =>
                     <g className="lumines-block" key={j}>
-                        {squares.map((color, i) =>
+                        {block.squares.map((color, i) =>
                             <Square key={i} color={color}
                                 x={getBlockSquareX(i)}
-                                y={j * (2 * SQUARE_SIZE + gap) + getBlockSquareY(i)} />
+                                y={block.y + getBlockSquareY(i)} />
                         )}
                     </g>
                 )}

@@ -40,12 +40,15 @@ export default class BlockStore extends BaseStore {
         const update = (time, gravity) => {
             this.waitFor([gravityStore]);
             this.decomposedSquares = new List();
-            const {block} = this;
+            const {block, queue} = this;
+
             block.update(time, gravity);
             if (!block.getFieldsBellow().every(field => squareStore.isFree(field))) {
                 this.decomposedSquares = block.decomposeToSquares();
                 resetBlock();
             }
+
+            queue.update(time);
         };
 
         // Allow certain actions only when the game is on
