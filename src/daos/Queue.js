@@ -29,7 +29,7 @@ export default class Queue extends ImmutableDao {
     }
 
     update(time) {
-        // Animate the queue until each block reaches it's target position
+        // Animate the queue until each block reaches its target position
         this.cursor(queue => queue.map((block, i) => {
             let y = getY(i);
             if (block.y > y) {
