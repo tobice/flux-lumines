@@ -18,6 +18,7 @@ import {range, measureTime} from './misc/jshelpers.js'
 import {getRandomBlock} from './game/squareHelpers.js'
 import Clock from './misc/Clock.js'
 import NumberHistory from './misc/NumberHistory.js'
+import {requestAnimationFrame, cancelAnimationFrame} from './misc/requestAnimationFrame.js'
 
 import {RESTART, PAUSE,UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, REFILL_QUEUE} from './game/actions.js'
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js'
@@ -45,11 +46,8 @@ export default class Lumines {
         this.updateTimeHistory = new NumberHistory(10);
         this.renderTimeHistory = new NumberHistory(10);
         this.debug = debug('Game');
-    }
 
-    start() {
-        // Listen to key strokes
-        window.addEventListener('keydown', e => {
+        this.keyDownListener = e => {
             switch(e.keyCode) {
                 case KEY_A:
                     this.dispatch(ROTATE_LEFT);
@@ -71,7 +69,7 @@ export default class Lumines {
                 case KEY_DOWN:
                     this.dispatch(DROP);
                     break;
-
+Request
                 case KEY_ESC:
                     this.dispatch(PAUSE);
                     break;
@@ -80,7 +78,12 @@ export default class Lumines {
                     this.dispatch(RESTART);
                     break;
             }
-        }, false);
+        };
+    }
+
+    start() {
+        // Listen to key strokes
+        window.addEventListener('keydown', this.keyDownListener);
 
         // Main game loop
         const clock = new Clock();
@@ -99,10 +102,14 @@ export default class Lumines {
             }));
 
             this.renderTimeHistory.add(measureTime(() => this.render()));
-
-            requestAnimationFrame(update);
+            this.requestId = requestAnimationFrame(update);
         };
-        requestAnimationFrame(update);
+        this.requestId = requestAnimationFrame(update);
+    }
+
+    stop() {
+        window.removeEventListener('keydown', this.keyDownListener);
+        cancelAnimationFrame(this.requestId);
     }
 
     dispatch(action, payload) {

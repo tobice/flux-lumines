@@ -3,9 +3,27 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Lumines</title>
+	<style>
+		body {
+			background-color: #313131;
+		}
+		#lumines {
+			width: 90%; margin: 20px auto;
+		}
+		a {
+			color: #515151;
+			text-decoration: none;
+			font-family: "Roboto Condensed", "Helvetica Neue", sans-serif;
+		}
+		a:hover {
+			color: white;
+		}
+	</style>
 </head>
-<body style="background-color: #313131">
-<div id="lumines" style="width: 95%; margin: 20px auto;"></div>
+<body style="">
+<a href="#" id="stop">stop</a>
+<a href="#" id="start">start</a>
+<div id="lumines"></div>
 
 <script src="http://localhost:9090/webpack-dev-server.js"></script>
 <script src="/build/bundle.js"></script>
