@@ -2,7 +2,7 @@
   "name": "flux-lumines",
   "version": "1.0.0",
   "description": "JavaScript implementation of a classic PSP game Lumines, using React.js and Flux",
-  "main": "index.js",
+  "main": "src/Lumines.js",
   "repository": "https://github.com/tobice/flux-lumines",
   "scripts": {
     "dev": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./webpack/dev.js --progress --colors --port 9090 --hot --inline"
