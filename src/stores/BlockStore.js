@@ -37,15 +37,41 @@ export default class BlockStore extends BaseStore {
             this.block.reset(speed, squares);
         };
 
+        const willCollide = () => {
+            return !this.block.getFieldsBellow().every(field => squareStore.isFree(field))
+        };
+
+        const decompose = () => {
+            this.decomposedSquares = this.block.decomposeToSquares();
+            resetBlock();
+        };
+
         const update = (time, gravity) => {
             this.waitFor([gravityStore]);
             this.decomposedSquares = new List();
             const {block, queue} = this;
 
-            block.update(time, gravity);
-            if (!block.getFieldsBellow().every(field => squareStore.isFree(field))) {
-                this.decomposedSquares = block.decomposeToSquares();
-                resetBlock();
+            if (block.dropped) {
+                // If the block is dropped, it's probably moving fast, making huge leaps between
+                // the frames. When reaching the conflicting position (there is something
+                // bellow), it could be already in the half of the next row. To avoid any
+                // flickering, I can't afford to render the block on this position. Therefore I
+                // have to first update and if I find conflict, I have to immediately
+                // attach the block to the grid on it's correct normalized coordinates.
+                block.update(time, gravity);
+                if (willCollide()) {
+                    decompose();
+                }
+            } else {
+                // However, if the block is not dropped, it is desirable to keep the block in a
+                // conflicting position for a while to allow user to make few more moves.
+                // Therefore I will check for collisions only in the moment when the block would
+                // actually reach the next row (and would possibly overlap existing squares).
+                if (block.willEnterNewRow(time) && willCollide()) {
+                    decompose();
+                } else {
+                    block.update(time, gravity);
+                }
             }
 
             queue.update(time);

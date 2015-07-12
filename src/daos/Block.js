@@ -3,7 +3,7 @@ import {Map, List} from 'immutable'
 import ImmutableDao from './ImmutableDao.js'
 import {GRID_COLUMNS, SQUARE_SIZE} from '../game/dimensions.js'
 import {range} from '../misc/jshelpers.js'
-import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, randomSquareColor} from '../game/squareHelpers.js'
+import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, randomSquareColor, normalizeY} from '../game/squareHelpers.js'
 
 export default class Block extends ImmutableDao {
 
@@ -34,16 +34,24 @@ export default class Block extends ImmutableDao {
     drop() {
         this.cursor(block => block.get('dropped') ? block : block
             .set('dropped', true)
-            .update('y', y => rowToY(yToRow(y))) // reset the y position to current row
+            .update('y', y => normalizeY(y))
             .update('speed', speed => speed * 40));
     }
 
     update(time, gravity) {
         this.cursor(block => block
-            // y shouldn't be change by more than SQUARE_SIZE to avoid square skipping
-            .update('y', y => y + Math.min(block.get('speed') * time, SQUARE_SIZE))
+            .update('y', y => this.nextY(time))
             .update('speed', speed =>
                 speed + gravity * time * block.get('dropped')));
+    }
+
+    willEnterNewRow(time) {
+        return yToRow(this.y) != yToRow(this.nextY(time));
+    }
+
+    nextY(time) {
+        // y shouldn't change by more than SQUARE_SIZE to avoid square skipping
+        return this.y + Math.min(this.speed * time, SQUARE_SIZE);
     }
 
     get x() {
@@ -58,6 +66,10 @@ export default class Block extends ImmutableDao {
         return this.cursor().get('speed');
     }
 
+    get dropped() {
+        return this.cursor().get('dropped');
+    }
+
     getFieldsBellow() {
         return new List([
             {x: this.x, y: this.y + 2 * SQUARE_SIZE},
@@ -69,7 +81,7 @@ export default class Block extends ImmutableDao {
         const {x, y} = this;
         return this.cursor().get('squares').map((color, i) => ({
             x: x + getBlockSquareX(i),
-            y: y + getBlockSquareY(i),
+            y: normalizeY(y) + getBlockSquareY(i),
             color: color,
             speed: this.speed / 3,
             scanned: false,
