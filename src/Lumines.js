@@ -120,6 +120,10 @@ Request
         this.dispatcher.dispatch({action, payload})
     }
 
+    register(callback) {
+        return this.dispatcher.register(callback);
+    }
+
     render() {
         let {scanLineStore, gameStateStore, squareStore, blockStore, timeStore, scoreStore, gravityStore} = this.stores;
         let {fpsHistory, updateTimeHistory, renderTimeHistory} = this;
