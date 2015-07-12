@@ -15,15 +15,17 @@ import DetachedSquares from './DetachedSquares.js'
 import DebugBar from './DebugBar.js'
 import HudPanel from './HudPanel.js'
 import Overlay from './Overlay.js'
+import Footer from './Footer.js'
 
 export default class GameInterface extends PureComponent {
     render() {
         let GUTTER = SQUARE_SIZE / 2,
             QUEUE_WIDTH = SQUARE_SIZE * 2,
-            HUD_PANEL_WIDTH = SQUARE_SIZE * 3;
+            HUD_PANEL_WIDTH = SQUARE_SIZE * 3,
+            FOOTER_HEIGHT = 5;
 
         let width = GUTTER + QUEUE_WIDTH + GUTTER + GRID_WIDTH + GUTTER + HUD_PANEL_WIDTH + GUTTER,
-            height = GUTTER + GRID_HEIGHT + GUTTER;
+            height = GUTTER + GRID_HEIGHT + GUTTER + FOOTER_HEIGHT;
 
         let overlayWidth = width,
             overlayHeight = 6 * SQUARE_SIZE;
@@ -47,6 +49,10 @@ export default class GameInterface extends PureComponent {
                         <Block block={this.props.block} />
                         <ScanLine scanLine={this.props.scanLine} />
                     </g>}
+                </Move>
+
+                <Move x={GUTTER + QUEUE_WIDTH + GUTTER} y={GUTTER + GRID_HEIGHT + GUTTER}>
+                    <Footer width={GRID_WIDTH} />
                 </Move>
 
                 <Move x={width - GUTTER - HUD_PANEL_WIDTH} y={GUTTER}>
