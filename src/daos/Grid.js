@@ -5,7 +5,7 @@ import {isOutOfRange, xToColumn, yToRow, normalizeX, normalizeY, getBlockSquareC
 import {SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../game/dimensions.js'
 import ImmutableDao from './ImmutableDao.js'
 
-/** Queue of blocks */
+/** Grid with attached squares */
 export default class Grid extends ImmutableDao {
 
     reset() {
