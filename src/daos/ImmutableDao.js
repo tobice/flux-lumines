@@ -1,5 +1,3 @@
-import {List} from 'immutable'
-
 export default class ImmutableDao {
     constructor(cursor) {
         this.cursor = cursor;

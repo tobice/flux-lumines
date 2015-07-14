@@ -1,13 +1,8 @@
-import Immutable from 'immutable'
-
-import BaseStore from './BaseStore.js'
-import {GRID_COLUMNS, SQUARE_SIZE, GRID_HEIGHT} from '../game/dimensions.js'
-import {RESTART, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
-import {PLAYING} from '../game/gameStates.js'
-import {generateBlock, columnToX, rowToY, yToRow} from '../game/squareHelpers.js'
-import Grid from '../daos/Grid.js'
-import DetachedSquares from '../daos/DetachedSquares.js'
-
+import BaseStore from './BaseStore.js';
+import {RESTART, UPDATE} from '../game/actions.js';
+import {PLAYING} from '../game/gameStates.js';
+import Grid from '../daos/Grid.js';
+import DetachedSquares from '../daos/DetachedSquares.js';
 
 export default class SquareStore extends BaseStore {
 
@@ -42,9 +37,9 @@ export default class SquareStore extends BaseStore {
 
             // Check the falling block. If it hit something and got decomposed, add to the grid
             if (blockStore.decomposedSquares.count() > 0) {
-                blockStore.decomposedSquares.reverse().forEach(square => {
-                    grid.isFreeBellow(square) ? detachedSquares.add(square) : grid.add(square);
-                });
+                blockStore.decomposedSquares.reverse().forEach(square =>
+                    grid.isFreeBellow(square) ? detachedSquares.add(square) : grid.add(square)
+                );
                 dirty = true;
             }
 
@@ -54,7 +49,7 @@ export default class SquareStore extends BaseStore {
 
                 // If no squares were scanned, we are no longer extending the area of scanned
                 // monoblocks, and we should remove all that has been scanned until now.
-                if (scanned.length == 0) {
+                if (scanned.length === 0) {
                     let {removed, detached} = grid.removeScannedMonoblocks();
                     detached.forEach(square => detachedSquares.add(square));
 
@@ -79,7 +74,7 @@ export default class SquareStore extends BaseStore {
                 break;
 
             case UPDATE:
-                if (gameStateStore.state == PLAYING) {
+                if (gameStateStore.state === PLAYING) {
                     update(payload.time, gravityStore.gravity);
                 }
                 break;

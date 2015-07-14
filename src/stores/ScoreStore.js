@@ -1,6 +1,6 @@
-import BaseStore from './BaseStore.js'
-import {UPDATE, RESTART} from '../game/actions.js'
-import {OVER} from '../game/gameStates.js'
+import BaseStore from './BaseStore.js';
+import {UPDATE, RESTART} from '../game/actions.js';
+import {OVER} from '../game/gameStates.js';
 
 export default class ScoreStore extends BaseStore {
 
@@ -15,7 +15,7 @@ export default class ScoreStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
-        let {configStore, squareStore, gameStateStore} = this.stores;
+        const {configStore, squareStore, gameStateStore} = this.stores;
 
         // Private methods
         const setScore = (score) => this.cursor(store => store.set('score', score));
@@ -44,7 +44,7 @@ export default class ScoreStore extends BaseStore {
                 }
 
                 // Remember the high score
-                if (gameStateStore.state == OVER) {
+                if (gameStateStore.state === OVER) {
                     if (this.score > (Number(localStorage.highScore) || 0)) {
                         localStorage.highScore = this.score;
                     }

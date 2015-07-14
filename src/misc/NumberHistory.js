@@ -1,4 +1,4 @@
-import {range} from './jshelpers.js'
+import {range} from './jshelpers.js';
 
 /** Simple structure for remembering last n values */
 export default class NumberHistory

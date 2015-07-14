@@ -1,4 +1,4 @@
-import debug from '../misc/debug.js'
+import debug from '../misc/debug.js';
 
 export default class BaseStore {
 

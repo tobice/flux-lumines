@@ -1,13 +1,13 @@
-import React from 'react'
+import React from 'react';
 
-import {isMonoblock} from '../game/squareHelpers.js'
-import PureComponent from './PureComponent.js'
-import Square from './Square.js'
-import Monoblock from './Monoblock.js'
+import {isMonoblock} from '../game/squareHelpers.js';
+import PureComponent from './PureComponent.js';
+import Square from './Square.js';
+import Monoblock from './Monoblock.js';
 
 export default class GridSquares extends PureComponent {
     render() {
-        const squares = this.props.grid.flatten().filter(square => square != null);
+        const squares = this.props.grid.flatten().filter(square => square !== null);
         return (
             <g>
                 {squares.map((square, i) =>
@@ -20,6 +20,6 @@ export default class GridSquares extends PureComponent {
                     <Square key={i} color={square.color} x={square.x} y={square.y} scanned />
                 )}
             </g>
-        )
+        );
     }
 }

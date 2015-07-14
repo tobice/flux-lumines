@@ -1,7 +1,7 @@
-import debug from 'debug'
+import debug from 'debug';
 
 debug.enable('lumines:*');
 
-export default function (name) {
+export default function(name) {
     return debug('lumines:' + name);
 }

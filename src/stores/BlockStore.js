@@ -1,11 +1,11 @@
-import {List} from 'immutable'
+import {List} from 'immutable';
 
-import BaseStore from './BaseStore.js'
-import Block from '../daos/Block.js'
-import Queue from '../daos/Queue.js'
-import {PLAYING} from '../game/gameStates.js'
-import {RESTART, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js'
-import {SQUARE_SIZE} from '../game/dimensions.js'
+import BaseStore from './BaseStore.js';
+import Block from '../daos/Block.js';
+import Queue from '../daos/Queue.js';
+import {PLAYING} from '../game/gameStates.js';
+import {RESTART, REFILL_QUEUE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP} from '../game/actions.js';
+import {SQUARE_SIZE} from '../game/dimensions.js';
 
 export default class BlockStore extends BaseStore {
 
@@ -38,7 +38,7 @@ export default class BlockStore extends BaseStore {
         };
 
         const willCollide = () => {
-            return !this.block.getFieldsBellow().every(field => squareStore.isFree(field))
+            return !this.block.getFieldsBellow().every(field => squareStore.isFree(field));
         };
 
         const decompose = () => {
@@ -62,24 +62,24 @@ export default class BlockStore extends BaseStore {
                 if (willCollide()) {
                     decompose();
                 }
-            } else {
+            } else if (block.willEnterNewRow(time) && willCollide()) {
                 // However, if the block is not dropped, it is desirable to keep the block in a
                 // conflicting position for a while to allow user to make few more moves.
                 // Therefore I will check for collisions only in the moment when the block would
                 // actually reach the next row (and would possibly overlap existing squares).
-                if (block.willEnterNewRow(time) && willCollide()) {
-                    decompose();
-                } else {
-                    block.update(time, gravity);
-                }
+                decompose();
+            } else {
+                block.update(time, gravity);
             }
+
 
             queue.update(time);
         };
 
         // Allow certain actions only when the game is on
-        if (gameStateStore.state != PLAYING &&
-            [RESTART, REFILL_QUEUE].indexOf(action) == -1) return;
+        if (gameStateStore.state !== PLAYING && [RESTART, REFILL_QUEUE].indexOf(action) === -1) {
+            return;
+        }
 
         switch (action) {
             case RESTART:

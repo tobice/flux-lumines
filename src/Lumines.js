@@ -1,27 +1,27 @@
-import React from 'react'
-import {Dispatcher} from 'flux'
+import React from 'react';
+import {Dispatcher} from 'flux';
 
-import styles from './styles.less'
+import styles from './styles.less';
 
-import debug from './misc/debug.js'
-import State from './misc/State.js'
-import GameInterface from './components/GameInterface.js'
-import ConfigStore from './stores/ConfigStore.js'
-import GravityStore from './stores/GravityStore.js'
-import GameStateStore from './stores/GameStateStore.js'
-import ScanLineStore from './stores/ScanLineStore.js'
-import BlockStore from './stores/BlockStore.js'
-import SquareStore from './stores/SquareStore.js'
-import TimeStore from './stores/TimeStore.js'
-import ScoreStore from './stores/ScoreStore.js'
-import {range, measureTime} from './misc/jshelpers.js'
-import {getRandomBlock} from './game/squareHelpers.js'
-import Clock from './misc/Clock.js'
-import NumberHistory from './misc/NumberHistory.js'
-import {requestAnimationFrame, cancelAnimationFrame} from './misc/requestAnimationFrame.js'
+import debug from './misc/debug.js';
+import State from './misc/State.js';
+import GameInterface from './components/GameInterface.js';
+import ConfigStore from './stores/ConfigStore.js';
+import GravityStore from './stores/GravityStore.js';
+import GameStateStore from './stores/GameStateStore.js';
+import ScanLineStore from './stores/ScanLineStore.js';
+import BlockStore from './stores/BlockStore.js';
+import SquareStore from './stores/SquareStore.js';
+import TimeStore from './stores/TimeStore.js';
+import ScoreStore from './stores/ScoreStore.js';
+import {measureTime} from './misc/jshelpers.js';
+import {getRandomBlock} from './game/squareHelpers.js';
+import Clock from './misc/Clock.js';
+import NumberHistory from './misc/NumberHistory.js';
+import {requestAnimationFrame, cancelAnimationFrame} from './misc/requestAnimationFrame.js';
 
-import {RESTART, PAUSE,UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, REFILL_QUEUE} from './game/actions.js'
-import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js'
+import {RESTART, PAUSE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, REFILL_QUEUE} from './game/actions.js';
+import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js';
 
 export default class Lumines {
 
@@ -48,7 +48,7 @@ export default class Lumines {
         this.debug = debug('Game');
 
         this.keyDownListener = e => {
-            switch(e.keyCode) {
+            switch (e.keyCode) {
                 case KEY_A:
                     this.dispatch(ROTATE_LEFT);
                     break;
@@ -69,7 +69,7 @@ export default class Lumines {
                 case KEY_DOWN:
                     this.dispatch(DROP);
                     break;
-Request
+
                 case KEY_ESC:
                     this.dispatch(PAUSE);
                     break;
@@ -113,11 +113,11 @@ Request
     }
 
     dispatch(action, payload) {
-        if (action != UPDATE) {
+        if (action !== UPDATE) {
             this.debug('Dispatched ' + action);
         }
 
-        this.dispatcher.dispatch({action, payload})
+        this.dispatcher.dispatch({action, payload});
     }
 
     register(callback) {

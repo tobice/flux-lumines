@@ -5,9 +5,9 @@ export default class Clock
         this.time = performance.now();
     }
 
-    next(now) {
-        now = now || performance.now();
-        let elapsed = now - this.time;
+    next(customNow) {
+        const now = customNow || performance.now();
+        const elapsed = now - this.time;
         this.time = now;
         return elapsed;
     }

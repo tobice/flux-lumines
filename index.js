@@ -1,4 +1,4 @@
-import Lumines from './src/Lumines.js'
+import Lumines from './src/Lumines.js';
 
 let config = {
     baseGravity: 120

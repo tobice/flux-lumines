@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 
-import PureComponent from './PureComponent.js'
-import Square from './Square.js'
-import {SQUARE_SIZE} from '../game/dimensions.js'
-import {getBlockSquareX, getBlockSquareY, columnToX, yToRow} from '../game/squareHelpers.js'
+import PureComponent from './PureComponent.js';
+import Square from './Square.js';
+import {SQUARE_SIZE} from '../game/dimensions.js';
+import {getBlockSquareX, getBlockSquareY, yToRow} from '../game/squareHelpers.js';
 
 export default class Block extends PureComponent {
     render() {
@@ -13,10 +13,10 @@ export default class Block extends PureComponent {
         const discretize = y => block.dropped ? y : yToRow(y) * SQUARE_SIZE;
 
         // Calculate strength of the blur effect depending on the speed
-        let blurDeviation = block.dropped ? block.speed / 150 : 0;
+        const blurDeviation = block.dropped ? block.speed / 150 : 0;
 
         return (
-            <g className="lumines-block" style={{ filter: "url('#blur')" }}>
+            <g className="lumines-block" style={{filter: "url('#blur')"}}>
                 <defs>
                     <filter id="blur" x={0} y={0} dangerouslySetInnerHTML={{__html:
                     '<feGaussianBlur in="SourceGraphic" stdDeviation="0,' + blurDeviation + '"/>'}}>
@@ -28,6 +28,6 @@ export default class Block extends PureComponent {
                         y={discretize(block.y + getBlockSquareY(i))} />
                 )}
             </g>
-        )
+        );
     }
 }

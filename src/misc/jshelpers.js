@@ -3,12 +3,12 @@ export function range(n) {
 }
 
 export function measureTime(cb) {
-    let start = performance.now();
+    const start = performance.now();
     cb();
     return performance.now() - start;
 }
 
 export function formatNumber(number) {
     // Separate thousands by comma
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }

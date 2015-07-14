@@ -1,9 +1,8 @@
-import {Map, List} from 'immutable'
+import {Map, List} from 'immutable';
 
-import ImmutableDao from './ImmutableDao.js'
-import {GRID_COLUMNS, SQUARE_SIZE} from '../game/dimensions.js'
-import {range} from '../misc/jshelpers.js'
-import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, randomSquareColor, normalizeY} from '../game/squareHelpers.js'
+import ImmutableDao from './ImmutableDao.js';
+import {GRID_COLUMNS, SQUARE_SIZE} from '../game/dimensions.js';
+import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, normalizeY} from '../game/squareHelpers.js';
 
 export default class Block extends ImmutableDao {
 
@@ -40,13 +39,13 @@ export default class Block extends ImmutableDao {
 
     update(time, gravity) {
         this.cursor(block => block
-            .update('y', y => this.nextY(time))
+            .update('y', () => this.nextY(time))
             .update('speed', speed =>
                 speed + gravity * time * block.get('dropped')));
     }
 
     willEnterNewRow(time) {
-        return yToRow(this.y) != yToRow(this.nextY(time));
+        return yToRow(this.y) !== yToRow(this.nextY(time));
     }
 
     nextY(time) {

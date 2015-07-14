@@ -1,8 +1,7 @@
-import {List} from 'immutable'
+import {List} from 'immutable';
 
-import {range} from '../misc/jshelpers.js'
-import {GRID_ROWS, GRID_COLUMNS, SQUARE_SIZE} from '../game/dimensions.js'
-import ImmutableDao from './ImmutableDao.js'
+import {SQUARE_SIZE} from '../game/dimensions.js';
+import ImmutableDao from './ImmutableDao.js';
 
 export default class DetachedSquares extends ImmutableDao {
 
@@ -27,7 +26,7 @@ export default class DetachedSquares extends ImmutableDao {
     forEach(cb) {
         this.cursor()
             .sort((a, b) => a.y > b.y ? -1 : b.y > a.y ? 1 : 0)
-            .forEach(cb)
+            .forEach(cb);
     }
 
     filter(cb) {

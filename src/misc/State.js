@@ -1,4 +1,4 @@
-import Immutable from 'immutable'
+import Immutable from 'immutable';
 
 export default class State {
     constructor() {
@@ -6,12 +6,14 @@ export default class State {
     }
 
     set state(state) {
-        if (this._state === state) return
-        this._state = state
+        if (this._state === state) {
+            return;
+        }
+        this._state = state;
     }
 
     get state() {
-        return this._state
+        return this._state;
     }
 
     cursor(path, defaultValue) {
@@ -24,6 +26,6 @@ export default class State {
             }
 
             return this.state.getIn(path);
-        }
+        };
     }
 }

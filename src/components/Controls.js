@@ -1,5 +1,5 @@
-import React from 'react'
-import PureComponent from './PureComponent.js'
+import React from 'react';
+import PureComponent from './PureComponent.js';
 
 export default class Controls extends PureComponent {
     render() {

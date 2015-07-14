@@ -1,8 +1,6 @@
-import Immutable from 'immutable'
-
-import {PLAYING} from '../game/gameStates.js'
-import {UPDATE, RESTART} from '../game/actions.js'
-import BaseStore from './BaseStore.js'
+import {PLAYING} from '../game/gameStates.js';
+import {UPDATE, RESTART} from '../game/actions.js';
+import BaseStore from './BaseStore.js';
 
 export default class TimeStore extends BaseStore {
 
@@ -15,7 +13,7 @@ export default class TimeStore extends BaseStore {
     }
 
     handleAction({action, payload}) {
-        let {gameStateStore} = this.stores;
+        const {gameStateStore} = this.stores;
 
         const setElapsed = (elapsed) =>
             this.cursor(store => store.set('elapsed', elapsed));
@@ -26,7 +24,7 @@ export default class TimeStore extends BaseStore {
                 break;
 
             case UPDATE:
-                if (gameStateStore.state == PLAYING) {
+                if (gameStateStore.state === PLAYING) {
                     setElapsed(this.elapsed + payload.time);
                 }
                 break;

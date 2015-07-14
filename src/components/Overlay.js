@@ -1,11 +1,11 @@
-import React from 'react'
-import PureComponent from './PureComponent.js'
-import Move from './Move.js'
-import Controls from './Controls.js'
+import React from 'react';
+import PureComponent from './PureComponent.js';
+import Move from './Move.js';
+import Controls from './Controls.js';
 
 export default class Overlay extends PureComponent {
     render() {
-        const {label, width, height, show} = this.props;
+        const {label, width, height} = this.props;
         const padding = 5;
         return (
             <g className="lumines-overlay">

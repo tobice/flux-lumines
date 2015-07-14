@@ -1,6 +1,6 @@
-import {List} from 'immutable'
-import ImmutableDao from './ImmutableDao.js'
-import {SQUARE_SIZE} from '../game/dimensions.js'
+import {List} from 'immutable';
+import ImmutableDao from './ImmutableDao.js';
+import {SQUARE_SIZE} from '../game/dimensions.js';
 
 const speed = 12 * SQUARE_SIZE;
 const gap = SQUARE_SIZE / 2;
@@ -18,7 +18,7 @@ export default class Queue extends ImmutableDao {
     }
 
     enqueue(squares) {
-        let y = getY(this.cursor().count());
+        const y = getY(this.cursor().count());
         this.cursor(queue => queue.push({squares, y}));
     }
 
@@ -31,7 +31,7 @@ export default class Queue extends ImmutableDao {
     update(time) {
         // Animate the queue until each block reaches its target position
         this.cursor(queue => queue.map((block, i) => {
-            let y = getY(i);
+            const y = getY(i);
             if (block.y > y) {
                 block.y = Math.max(y, block.y - time * speed);
             }

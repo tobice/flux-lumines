@@ -1,13 +1,11 @@
-import React from 'react'
+import React from 'react';
 
-import PureComponent from './PureComponent.js'
-import Square from './Square.js'
-import {SQUARE_SIZE} from '../game/dimensions.js'
-import {getBlockSquareX, getBlockSquareY, columnToX, yToRow} from '../game/squareHelpers.js'
+import PureComponent from './PureComponent.js';
+import Square from './Square.js';
+import {getBlockSquareX, getBlockSquareY} from '../game/squareHelpers.js';
 
 export default class Queue extends PureComponent {
     render() {
-        const gap = SQUARE_SIZE / 2;
         return (
             <g className="queue">
                 {this.props.queue.take(3).map((block, j) =>
@@ -20,6 +18,6 @@ export default class Queue extends PureComponent {
                     </g>
                 )}
             </g>
-        )
+        );
     }
 }

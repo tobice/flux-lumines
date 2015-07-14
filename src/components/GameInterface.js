@@ -1,21 +1,21 @@
-import React from 'react'
+import React from 'react';
 
-import PureComponent from './PureComponent.js'
-import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../game/dimensions.js'
-import {WELCOME, PLAYING, PAUSED, OVER} from '../game/gameStates.js'
-import {formatNumber} from '../misc/jshelpers.js'
+import PureComponent from './PureComponent.js';
+import {GRID_WIDTH, GRID_HEIGHT, SQUARE_SIZE} from '../game/dimensions.js';
+import {WELCOME, PAUSED, OVER} from '../game/gameStates.js';
+import {formatNumber} from '../misc/jshelpers.js';
 
-import Move from './Move.js'
-import GridBackground from './GridBackground.js'
-import ScanLine from './ScanLine.js'
-import Block from './Block.js'
-import Queue from './Queue.js'
-import GridSquares from './GridSquares.js'
-import DetachedSquares from './DetachedSquares.js'
-import DebugBar from './DebugBar.js'
-import HudPanel from './HudPanel.js'
-import Overlay from './Overlay.js'
-import Footer from './Footer.js'
+import Move from './Move.js';
+import GridBackground from './GridBackground.js';
+import ScanLine from './ScanLine.js';
+import Block from './Block.js';
+import Queue from './Queue.js';
+import GridSquares from './GridSquares.js';
+import DetachedSquares from './DetachedSquares.js';
+import DebugBar from './DebugBar.js';
+import HudPanel from './HudPanel.js';
+import Overlay from './Overlay.js';
+import Footer from './Footer.js';
 
 export default class GameInterface extends PureComponent {
     render() {
@@ -33,7 +33,7 @@ export default class GameInterface extends PureComponent {
         let {state} = this.props;
 
         return (
-            <svg viewBox={"0 0 " + width + " " + height} className={"lumines lumines-" + this.props.color}>
+            <svg viewBox={'0 0 ' + width + ' ' + height} className={'lumines lumines-' + this.props.color}>
                 <rect x={0} y={0} width={width} height={height} className="lumines-background" />
 
                 <Move x={GUTTER} y={GUTTER + 2 * SQUARE_SIZE}>
@@ -45,7 +45,7 @@ export default class GameInterface extends PureComponent {
                     <GridSquares grid={this.props.grid} />
                     <DetachedSquares detachedSquares={this.props.detachedSquares} />
 
-                    {state != WELCOME && <g>
+                    {state !== WELCOME && <g>
                         <Block block={this.props.block} />
                         <ScanLine scanLine={this.props.scanLine} />
                     </g>}
@@ -64,7 +64,7 @@ export default class GameInterface extends PureComponent {
                 </Move>
 
                 <Move x={0} y={3 * SQUARE_SIZE}>
-                    {state == WELCOME &&
+                    {state === WELCOME &&
                     <Overlay width={overlayWidth} height={overlayHeight} label="Welcome to Lumines">
                         <tspan>Press </tspan>
                         <tspan className="lumines-text-colored">R</tspan>
@@ -72,7 +72,7 @@ export default class GameInterface extends PureComponent {
                     </Overlay>
                     }
 
-                    {state == PAUSED &&
+                    {state === PAUSED &&
                     <Overlay width={overlayWidth} height={overlayHeight} label="Game paused">
                         <tspan>Press </tspan>
                         <tspan className="lumines-text-colored">Esc</tspan>
@@ -80,9 +80,9 @@ export default class GameInterface extends PureComponent {
                     </Overlay>
                     }
 
-                    {state == OVER &&
+                    {state === OVER &&
                     <Overlay width={overlayWidth} height={overlayHeight}
-                        label={"Game over. Your score is " + formatNumber(this.props.hud.score)}>
+                        label={'Game over. Your score is ' + formatNumber(this.props.hud.score)}>
                         <tspan>Press </tspan>
                         <tspan className="lumines-text-colored">R</tspan>
                         <tspan> to restart the game</tspan>
@@ -90,6 +90,6 @@ export default class GameInterface extends PureComponent {
                     }
                 </Move>
             </svg>
-        )
+        );
     }
 }

@@ -1,10 +1,10 @@
-import {Map} from 'immutable'
+import {Map} from 'immutable';
 
-import BaseStore from './BaseStore.js'
-import dimensions from '../game/dimensions.js'
-import {UPDATE, RESTART} from '../game/actions.js'
-import {PLAYING} from '../game/gameStates.js'
-import {xToColumn} from '../game/squareHelpers.js'
+import BaseStore from './BaseStore.js';
+import dimensions from '../game/dimensions.js';
+import {UPDATE, RESTART} from '../game/actions.js';
+import {PLAYING} from '../game/gameStates.js';
+import {xToColumn} from '../game/squareHelpers.js';
 
 export default class ScanLineStore extends BaseStore {
 
@@ -32,11 +32,13 @@ export default class ScanLineStore extends BaseStore {
                 break;
 
             case UPDATE:
-                if (gameStateStore.state != PLAYING) return;
+                if (gameStateStore.state !== PLAYING) {
+                    return;
+                }
 
                 this.cursor(scanline => scanline.withMutations(scanline => {
                     let position = (this.position + payload.time * this.speed) % dimensions.GRID_WIDTH;
-                    let enteredNewColumn = xToColumn(position) != this.column;
+                    let enteredNewColumn = xToColumn(position) !== this.column;
                     scanline.set('position', position).set('enteredNewColumn', enteredNewColumn);
                 }));
                 break;

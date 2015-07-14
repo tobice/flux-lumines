@@ -1,7 +1,5 @@
-import Immutable from 'immutable'
-
-import DefaultConfig from '../game/DefaultConfig.js'
-import BaseStore from './BaseStore.js'
+import DefaultConfig from '../game/DefaultConfig.js';
+import BaseStore from './BaseStore.js';
 
 export default class ConfigStore extends BaseStore {
 
@@ -10,7 +8,7 @@ export default class ConfigStore extends BaseStore {
         this.cursor = state.cursor([ConfigStore.name], new DefaultConfig(config));
     }
 
-    handleAction() {  }
+    handleAction() { }
 
     get baseBlockSpeed() {
         return this.cursor().get('baseBlockSpeed');

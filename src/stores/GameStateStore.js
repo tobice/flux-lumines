@@ -1,8 +1,6 @@
-import Immutable from 'immutable'
-
-import {WELCOME, OVER, PAUSED, PLAYING} from '../game/gameStates.js'
-import {UPDATE, RESTART, PAUSE} from '../game/actions.js'
-import BaseStore from './BaseStore.js'
+import {WELCOME, OVER, PAUSED, PLAYING} from '../game/gameStates.js';
+import {UPDATE, RESTART, PAUSE} from '../game/actions.js';
+import BaseStore from './BaseStore.js';
 
 /** Current game state */
 export default class GameStateStore extends BaseStore {
@@ -16,7 +14,7 @@ export default class GameStateStore extends BaseStore {
     }
 
     handleAction({action}) {
-        let {squareStore} = this.stores;
+        const {squareStore} = this.stores;
 
         const setState = (state) =>
             this.cursor(store => store.set('state', state));
