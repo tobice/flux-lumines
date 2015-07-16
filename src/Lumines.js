@@ -1,4 +1,5 @@
 import React from 'react';
+import Immutable from 'immutable';
 import {Dispatcher} from 'flux';
 
 import styles from './styles.less';
@@ -19,6 +20,8 @@ import {getRandomBlock} from './game/squareHelpers.js';
 import Clock from './misc/Clock.js';
 import NumberHistory from './misc/NumberHistory.js';
 import {requestAnimationFrame, cancelAnimationFrame} from './misc/requestAnimationFrame.js';
+import Square from './game/Square.js';
+import Monoblock from './game/Monoblock.js';
 
 import {RESTART, PAUSE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, REFILL_QUEUE} from './game/actions.js';
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js';
@@ -147,5 +150,28 @@ export default class Lumines {
                 render: renderTimeHistory.average(), renderMax: renderTimeHistory.max(),
                 gravity: gravityStore.gravity
             }} />, this.mountpoint);
+    }
+
+    getState() {
+        return this.state.state.toJS();
+    }
+
+    setState(json) {
+        const squareKeys = (new Square()).keySeq();
+        const monoblockKeys = (new Monoblock()).keySeq();
+
+        // Revive the state using custom reviver that detects Squares and Monoblocks and creates
+        // appropriate Records instead of simple Maps.
+        this.state.state = Immutable.fromJS(json, (key, value) => {
+            if (Immutable.Iterable.isIndexed(value)) {
+                return value.toList();
+            } else if (value.keySeq().equals(squareKeys)) {
+                return new Square(value);
+            } else if (value.keySeq().equals(monoblockKeys)) {
+                return new Monoblock(value);
+            } else {
+                return value.toMap();
+            }
+        });
     }
 }
