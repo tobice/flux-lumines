@@ -15,8 +15,8 @@ export default class Square extends PureComponent {
 
         return (
             <rect x={this.props.x} y={this.props.y}
-                  width={SQUARE_SIZE} height={SQUARE_SIZE}
-                  className={classes} />
+                width={SQUARE_SIZE} height={SQUARE_SIZE}
+                className={classes} />
         );
     }
 }

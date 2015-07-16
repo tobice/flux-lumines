@@ -14,13 +14,12 @@ export default class DetachedSquares extends ImmutableDao {
     }
 
     update(time, gravity) {
-        this.cursor(squares => squares.map(square => {
-            // y shouldn't be change by more than SQUARE_SIZE to avoid square skipping
-            square.y += Math.min(square.speed * time, SQUARE_SIZE);
-            square.speed += gravity * time;
-            return square;
-        }));
-
+        this.cursor(squares => squares.map(square =>
+            square
+                // y shouldn't be changed by more than SQUARE_SIZE to avoid square skipping
+                .update('y', y => y + Math.min(square.get('speed') * time, SQUARE_SIZE))
+                .update('speed', speed => speed + gravity * time)
+        ));
     }
 
     forEach(cb) {

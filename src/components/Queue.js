@@ -10,10 +10,10 @@ export default class Queue extends PureComponent {
             <g className="queue">
                 {this.props.queue.take(3).map((block, j) =>
                     <g className="lumines-block" key={j}>
-                        {block.squares.map((color, i) =>
+                        {block.get('squares').map((color, i) =>
                             <Square key={i} color={color}
                                 x={getBlockSquareX(i)}
-                                y={block.y + getBlockSquareY(i)} />
+                                y={block.get('y') + getBlockSquareY(i)} />
                         )}
                     </g>
                 )}

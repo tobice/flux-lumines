@@ -3,6 +3,7 @@ import {Map, List} from 'immutable';
 import ImmutableDao from './ImmutableDao.js';
 import {GRID_COLUMNS, SQUARE_SIZE} from '../game/dimensions.js';
 import {getBlockSquareX, getBlockSquareY, columnToX, rowToY, yToRow, normalizeY} from '../game/squareHelpers.js';
+import Square from '../game/Square.js';
 
 export default class Block extends ImmutableDao {
 
@@ -78,13 +79,11 @@ export default class Block extends ImmutableDao {
 
     decomposeToSquares() {
         const {x, y} = this;
-        return this.cursor().get('squares').map((color, i) => ({
+        return this.cursor().get('squares').map((color, i) => new Square({
             x: x + getBlockSquareX(i),
             y: normalizeY(y) + getBlockSquareY(i),
             color: color,
-            speed: this.speed / 3,
-            scanned: false,
-            monoblock: null
+            speed: this.speed / 3
         }));
     }
 }

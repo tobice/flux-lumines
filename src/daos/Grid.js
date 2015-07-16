@@ -4,6 +4,7 @@ import {range} from '../misc/jshelpers.js';
 import {isOutOfRange, xToColumn, yToRow, normalizeX, normalizeY, getBlockSquareColumn, getBlockSquareRow, areOfTheSameColor} from '../game/squareHelpers.js';
 import {SQUARE_SIZE, GRID_ROWS, GRID_COLUMNS} from '../game/dimensions.js';
 import ImmutableDao from './ImmutableDao.js';
+import Monoblock from '../game/Monoblock.js';
 
 /** Grid with attached squares */
 export default class Grid extends ImmutableDao {
@@ -20,9 +21,12 @@ export default class Grid extends ImmutableDao {
     }
 
     add(square) {
-        square.x = normalizeX(square.x);
-        square.y = normalizeY(square.y);
-        this.cursor(grid => grid.setIn([xToColumn(square.x), yToRow(square.y)], square));
+        const normalizedSquare = square
+            .set('x', normalizeX(square.x))
+            .set('y', normalizeY(square.y));
+        this.cursor(grid => grid.setIn([
+            xToColumn(normalizedSquare.x),
+            yToRow(normalizedSquare.y)], normalizedSquare));
     }
 
     isFree({x, y}) {
@@ -49,33 +53,28 @@ export default class Grid extends ImmutableDao {
 
             function createMonoBlock(monoblock, squares) {
                 squares.forEach(({x, y}) =>
-                    grid.updateIn([xToColumn(x), yToRow(y)], square => {
-                        square.monoblock = monoblock;
-                        return square;
-                    }));
+                    grid.updateIn([xToColumn(x), yToRow(y)], square =>
+                        square.set('monoblock', monoblock)));
             }
 
             function removeMonoBlock(monoblock, squares) {
                 squares.forEach(({x, y}) =>
-                    grid.updateIn([xToColumn(x), yToRow(y)], square => {
+                    grid.updateIn([xToColumn(x), yToRow(y)], square =>
                         // Remove all squares from the monoblock.
                         // I can remove the monoblock pointer only when it points to this
                         // very monoblock. The square might be part of another monoblock
                         // in which case I should leave it.
-                        if (square.monoblock
-                            && square.monoblock.x === monoblock.x
-                            && square.monoblock.y === monoblock.y) {
-                            square.monoblock = null;
-                            square.scanned = false;
-                        }
-                        return square;
-                    }));
+                        square.monoblock && square.monoblock.equals(monoblock) ?
+                            square.set('monoblock', null).set('scanned', false) : square
+                    ));
             }
 
             // This will go through the all squares on the grid, starting top left, going column
-            // after column until it finishes bottom right
-            grid.flatten().filter(square => square !== null).forEach(square => {
-                const monoblock = {x: square.x, y: square.y};
+            // after column until it finishes bottom right. Notice, that flatten() won't change
+            // the grid even though we're inside withMutations(). Only limited set of operations
+            // may be used mutatively.
+            grid.flatten(1).filter(square => square !== null).forEach(square => {
+                const monoblock = new Monoblock(square);
                 const squares = getSquaresInBlock(monoblock);
 
                 if (squares.length === 4 && areOfTheSameColor(squares)) {
@@ -95,13 +94,10 @@ export default class Grid extends ImmutableDao {
     scanColumn(column) {
         const scanned = [];
         this.cursor(grid => grid.updateIn([column], squares =>
-            squares.map(square => {
-                if (square && square.monoblock) {
-                    square.scanned = true;
-                    scanned.push(square);
-                }
-                return square;
-            })
+            squares.map(square =>
+                square && square.monoblock ?
+                    scanned.push(square) && square.set('scanned', true) : square
+            )
         ));
 
         return scanned;
@@ -140,7 +136,7 @@ export default class Grid extends ImmutableDao {
     }
 
     count() {
-        return this.cursor().flatten().filter(square => square !== null).count();
+        return this.cursor().flatten(1).filter(square => square !== null).count();
     }
 
     isTopReached() {

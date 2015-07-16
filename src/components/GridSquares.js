@@ -7,7 +7,7 @@ import Monoblock from './Monoblock.js';
 
 export default class GridSquares extends PureComponent {
     render() {
-        const squares = this.props.grid.flatten().filter(square => square !== null);
+        const squares = this.props.grid.flatten(1).filter(square => square !== null);
         return (
             <g>
                 {squares.map((square, i) =>

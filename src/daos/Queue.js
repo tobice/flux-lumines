@@ -1,4 +1,4 @@
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import ImmutableDao from './ImmutableDao.js';
 import {SQUARE_SIZE} from '../game/dimensions.js';
 
@@ -18,24 +18,25 @@ export default class Queue extends ImmutableDao {
     }
 
     enqueue(squares) {
-        const y = getY(this.cursor().count());
-        this.cursor(queue => queue.push({squares, y}));
+        const block = new Map({
+            squares: new List(squares),
+            y: getY(this.cursor().count())
+        });
+        this.cursor(queue => queue.push(block));
     }
 
     dequeue() {
-        const squares = this.cursor().first().squares;
+        const squares = this.cursor().first().get('squares');
         this.cursor(queue => queue.shift());
-        return squares;
+        return squares.toJS();
     }
 
     update(time) {
         // Animate the queue until each block reaches its target position
         this.cursor(queue => queue.map((block, i) => {
-            const y = getY(i);
-            if (block.y > y) {
-                block.y = Math.max(y, block.y - time * speed);
-            }
-            return block;
+            const targetY = getY(i);
+            return block.get('y') > targetY ?
+                block.update('y', y => Math.max(targetY, y - time * speed)) : block;
         }));
     }
 }
