@@ -5,19 +5,39 @@ import PureComponent from './PureComponent.js';
 import Square from './Square.js';
 import Monoblock from './Monoblock.js';
 
+import Column from './Column.js';
+
+// Define a column component for each type of squares. This might seem cumbersome but
+// it's done for a reason. Each of these components will receive column of squares directly from the
+// immutable global state. Therefore shouldComponentUpdate() will be able to
+// correctly detect changes (or ignore props when there are no changes at all). Only after that
+// we can actually modify the list of squares and print only what we need.
+
+const SquareColumn = Column(squares => squares.filter(square =>
+    square !== null && !square.scanned && !isMonoblock(square)), Square);
+const MonoblockColumn = Column(squares => squares.filter(square =>
+    square !== null && isMonoblock(square)).reverse(), Monoblock);
+const ScannedColumn = Column(squares => squares.filter(square =>
+    square !== null && square.scanned), Square);
+
+let previousGrid;
+
 export default class GridSquares extends PureComponent {
     render() {
-        const squares = this.props.grid.flatten(1).filter(square => square !== null);
+        const {grid} = this.props;
+
+        // As the order matters in SVG (it replaces z-index), we can't render all squares in a
+        // single run.
         return (
             <g>
-                {squares.map((square, i) =>
-                    <Square key={i} color={square.color} x={square.x} y={square.y} />
+                {grid.map((squares, i) =>
+                    <SquareColumn key={i} squares={squares} />
                 )}
-                {squares.filter(square => isMonoblock(square)).reverse().map((square, i) =>
-                    <Monoblock key={i} color={square.color} x={square.x} y={square.y} />
+                {grid.map((squares, i) =>
+                    <MonoblockColumn key={i} squares={squares} />
                 )}
-                {squares.filter(square => square.scanned).map((square, i) =>
-                    <Square key={i} color={square.color} x={square.x} y={square.y} scanned />
+                {grid.map((squares, i) =>
+                    <ScannedColumn key={i} squares={squares} />
                 )}
             </g>
         );

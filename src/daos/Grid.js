@@ -93,12 +93,18 @@ export default class Grid extends ImmutableDao {
      */
     scanColumn(column) {
         const scanned = [];
-        this.cursor(grid => grid.updateIn([column], squares =>
+        const grid = this.cursor().update(grid => grid.updateIn([column], squares =>
             squares.map(square =>
                 square && square.monoblock ?
                     scanned.push(square) && square.set('scanned', true) : square
             )
         ));
+
+        // The Map#map() always returns a new reference even when no values changed. To avoid
+        // redundant updates of the UI, we check for changes manually.
+        if (scanned.length > 0) {
+            this.cursor(() => grid);
+        }
 
         return scanned;
     }
@@ -111,26 +117,26 @@ export default class Grid extends ImmutableDao {
     removeScannedMonoblocks() {
         const removed = [], detached = [];
 
-        this.cursor(grid => grid.withMutations(grid => {
-            // Cycle column by column, from bottom up, to identify all squares that should be
-            // removed or detached in a single run.
-            grid.forEach((squares, column) =>
-                squares.filter(square => square).reverse().forEach(square => {
-                    const row = yToRow(square.y);
+        // Cycle column by column, from the bottom up, to identify all squares that should be
+        // removed or detached. We can do it in a single run.
+        this.cursor().forEach((squares, column) =>
+            squares.reverse().forEach(square => {
+                if (!square) {
+                    return;
+                }
 
+                const row = yToRow(square.y);
+                if (square.scanned) {
                     // Remove scanned
-                    if (square.scanned) {
-                        removed.push(square);
-                        grid.setIn([column, row], null);
-                    }
+                    removed.push(square);
+                    this.cursor(grid => grid.setIn([column, row], null));
+                } else if (this.cursor().getIn([column, row + 1]) === null) {
                     // Detach those that have nothing bellow (the square bellow was removed)
-                    else if (grid.getIn([column, row + 1]) === null) {
-                        detached.push(square);
-                        grid.setIn([column, row], null);
-                    }
-                })
-            );
-        }));
+                    detached.push(square);
+                    this.cursor(grid => grid.setIn([column, row], null));
+                }
+            })
+        );
 
         return {removed, detached};
     }
