@@ -25,6 +25,7 @@ import Monoblock from './game/Monoblock.js';
 
 import {RESTART, PAUSE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT, DROP, REFILL_QUEUE} from './game/actions.js';
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js';
+import {OVER, PAUSED} from './game/gameStates.js';
 
 export default class Lumines {
 
@@ -173,5 +174,13 @@ export default class Lumines {
                 return value.toMap();
             }
         });
+    }
+
+    isPaused() {
+        return this.stores.gameStateStore.state === PAUSED;
+    }
+
+    isOver() {
+        return this.stores.gameStateStore.state === OVER;
     }
 }
