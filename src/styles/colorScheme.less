@@ -1,0 +1,31 @@
+/** Color scheme template */
+.color-scheme(@dark, @light: #fafafa) {
+  .lumines-text-colored {
+    fill: @dark;
+  }
+  .lumines-square-light {
+    fill: @light;
+  }
+  .lumines-square-dark {
+    fill: @dark;
+  }
+  .lumines-square-scanned {
+    fill: #5a5a5a;
+  }
+  .lumines-hud-value {
+    fill: @light;
+  }
+  .lumines-hud-label {
+    fill: @dark;
+  }
+  .lumines-monoblock-light {
+    fill: darken(@light, 15%);
+  }
+  .lumines-monoblock-dark {
+    fill: darken(@dark, 10%);
+  }
+  .lumines-control-key {
+    fill: @dark;
+  }
+}
+

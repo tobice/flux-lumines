@@ -2,7 +2,7 @@ import React from 'react';
 import Immutable from 'immutable';
 import {Dispatcher} from 'flux';
 
-import styles from './styles.less';
+import styles from './styles/styles.less';
 
 import debug from './misc/debug.js';
 import State from './misc/State.js';
