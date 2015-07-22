@@ -7,7 +7,7 @@ export default class ScoreStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.cursor = state.cursor([ScoreStore.name], {
+        this.cursor = state.cursor(['ScoreStore'], {
             score: 0,
             hudScore: 0,
             speed: 0

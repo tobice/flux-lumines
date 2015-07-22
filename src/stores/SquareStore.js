@@ -9,8 +9,8 @@ export default class SquareStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.grid = new Grid(state.cursor([SquareStore.name, 'grid'], {}));
-        this.detachedSquares = new DetachedSquares(state.cursor([SquareStore.name, 'detachedSquares'], {}));
+        this.grid = new Grid(state.cursor(['SquareStore', 'grid'], {}));
+        this.detachedSquares = new DetachedSquares(state.cursor(['SquareStore', 'detachedSquares'], {}));
 
         // To be temporary exposed during a cycle.
         this.removedSquares = [];

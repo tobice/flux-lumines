@@ -8,7 +8,7 @@ export default class GameStateStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.cursor = state.cursor([GameStateStore.name], {
+        this.cursor = state.cursor(['GameStateStore'], {
             state: WELCOME
         });
     }

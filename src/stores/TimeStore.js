@@ -7,7 +7,7 @@ export default class TimeStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.cursor = state.cursor([TimeStore.name], {
+        this.cursor = state.cursor(['TimeStore'], {
             elapsed: 0
         });
     }

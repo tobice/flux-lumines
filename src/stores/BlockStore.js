@@ -12,8 +12,8 @@ export default class BlockStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.block = new Block(state.cursor([BlockStore.name, 'block'], {}));
-        this.queue = new Queue(state.cursor([BlockStore.name, 'queue'], {}));
+        this.block = new Block(state.cursor(['BlockStore', 'block'], {}));
+        this.queue = new Queue(state.cursor(['BlockStore', 'queue'], {}));
 
         this.decomposedSquares = new List();
     }

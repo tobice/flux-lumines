@@ -11,7 +11,7 @@ export default class ScanLineStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.cursor = state.cursor([ScanLineStore.name], {
+        this.cursor = state.cursor(['ScanLineStore'], {
             position: 0,
             enteredNewColumn: false,
             speed: 0

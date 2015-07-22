@@ -8,7 +8,7 @@ export default class GravityStore extends BaseStore {
     constructor(dispatcher, state, stores) {
         super(dispatcher, stores);
 
-        this.cursor = state.cursor([GravityStore.name], {
+        this.cursor = state.cursor(['GravityStore'], {
             gravity: 0
         });
     }

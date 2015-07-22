@@ -5,7 +5,7 @@ export default class ConfigStore extends BaseStore {
 
     constructor(dispatcher, state, stores, config) {
         super(dispatcher, stores);
-        this.cursor = state.cursor([ConfigStore.name], new DefaultConfig(config));
+        this.cursor = state.cursor(['ConfigStore'], new DefaultConfig(config));
     }
 
     handleAction() { }
