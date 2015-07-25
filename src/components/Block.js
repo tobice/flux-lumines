@@ -17,11 +17,10 @@ export default class Block extends PureComponent {
 
         return (
             <g className="lumines-block" style={{filter: "url('#blur')"}}>
-                <defs>
-                    <filter id="blur" x={0} y={0} dangerouslySetInnerHTML={{__html:
-                    '<feGaussianBlur in="SourceGraphic" stdDeviation="0,' + blurDeviation + '"/>'}}>
-                    </filter>
-                </defs>
+                <defs dangerouslySetInnerHTML={{__html:
+                    '<filter color-interpolation-filters="sRGB" id="blur" x="0" y="0">' +
+                    '    <feGaussianBlur in="SourceGraphic" stdDeviation="0,' + blurDeviation + '"/> ' +
+                    '</filter>'}} />
                 {block.squares.map((color, i) =>
                     <Square key={i} color={color}
                         x={block.x + getBlockSquareX(i)}
