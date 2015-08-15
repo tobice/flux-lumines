@@ -3,6 +3,8 @@
 Lumines is not a typical React application and when I was making it I ran into some interesting 
 issues. 
 
+TODO: make a scheme of terms
+
 ## The Flux
 
 Flux is what drives this application. It's an application architecture or maybe just a pattern,
@@ -21,7 +23,7 @@ all together, distributing actions to the stores.
 
 To give you an idea how Flux works in Lumines, here is an example:
 
-1. The player hits the **arrow left** button.
+1. The player hits the button **A**.
 2. Action `ROTATE_LEFT` is created and dispatched using **dispatcher** to all stores.
 3. The **Block store** will respond to this action and update itself. It will rotate the falling 
 block to the left.
@@ -59,7 +61,7 @@ synchronized with the browser repaints. That can be achieved using the
 [requestAnimationFrame()](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
 function. So the main game loop looks as follows:
 
-```
+```javascript
 const clock = new Clock();
 const update = (time) => {
     let elapsed = clock.next(time) / 1000;
@@ -69,6 +71,8 @@ const update = (time) => {
 };
 requestAnimationFrame(update);
 ```
+
+If you ever created a WebGL/OpenGL application, this should look very familiar to you.
 
 ### Making the game deterministic
 
@@ -84,8 +88,79 @@ So why is there a special action for that?
 The problem is that there is a random element involved. The new blocks are generated randomly. By
 taking the block generation out of the core, we make the game 100% deterministic. Therefore at 
 any point during the game, **the actual state depends completely on the previous actions**. So if you
-want to record the game and then replay it, it's very easy. All you have to do is to hook to the 
-dispatcher and remember all dispatched actions (with timestamps). After that you can simply start a 
-new game and then dispatch all the recorded actions in correct order with appropriate timing.
+want to record the game and then replay it, it's very easy. All you have to do is to register to 
+the dispatcher and remember all dispatched actions (with timestamps). After that you can simply start a 
+new game and then dispatch all the recorded actions in correct order with appropriate timing (or 
+not, you could dispatch all the actions at double speed. What matters is the time information 
+carried with the `UPDATE` actions).
+
+This obviously wouldn't work if the block generation was left in the game core. You could of 
+course record all the actions and remember what the player *did* (his moves) but it wouldn't make
+any sense as the game situation (squares on the grid) would be completely different.
 
 An actual implementation of this can be found [here](https://github.com/tobice/flux-lumines-demos/blob/master/recording/recording.js).
+
+## The stores
+
+TODO: make a scheme of stores
+
+The game consists of several separated logical components and each one of them is represented by 
+a single store. A typical example is the `ScanLineStore` that represents the scan line. All 
+stores are registered to the **dispatcher** (including this one) and listen to all incoming 
+actions. Regarding stores, there are several neat features stemming from the Flux pattern:
+
+1. All stores can be updated only through actions.
+2. All actions come through a single entry in the store.
+3. A new action cannot be dispatched before the previous is finished. That also means that all 
+stores are updated at once in a single run, always leaving the application in a consistent state.
+3. The data inside a store are accessible from the outside only through a read-only public API.
+
+The result is that it is really easy to reason about what is happening in the store. To give you 
+an idea, this is how the `ScanLineStore` looks from the inside:
+
+```javascript
+class ScanLineStore extends BaseStore {
+    constructor() {
+        // Init default values
+    }
+
+    handleAction({action, payload}) {
+        switch (action) {
+            case RESTART:
+                // Reset the position 
+                break;
+
+            case UPDATE:
+                // Move the line
+                break;
+        }
+    }
+
+    get position() {
+        // Return the position
+    }
+}
+```
+
+*Notice some of the ES6 syntax sugar at work, like destructing or getters.*
+
+### Using `waitFor()`
+
+Sometimes it is necessary to enforce the order in which the stores are updated. For example, we 
+want to first move the scan line and only when that's done we want to update the square grid. 
+This can be achieved using a not very common method of the dispatcher 
+[`waitFor()`](https://github.com/facebook/flux/blob/master/src/Dispatcher.js).
+(I'm talking about the Facebook's implementation of Flux).
+
+When you're about to perform an update inside a store, but you need to make sure that another 
+store is updated first, you simply call this method with the desired store as the method argument.
+
+The name of this method might suggest that there is some kind of *asynchronicity* involved (like 
+waiting for another thread to finish) but that's not true (besides, JavaScript is single-threaded). 
+The dispatcher simply checks whether the store you want to wait for is already updated (using current
+action) and if not, it updates it first. 
+ 
+This way you have a complete control over what is going on in the application and everything is 
+nicely separated. It's perfect... except it's not.
+
+### Circular dependencies
