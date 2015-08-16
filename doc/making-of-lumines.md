@@ -164,3 +164,77 @@ This way you have a complete control over what is going on in the application an
 nicely separated. It's perfect... except it's not.
 
 ### Circular dependencies
+
+Flux is an easy to understand concept but once you try to actually use it, you might soon get 
+into troubles. One of the complications that might arise are circular dependencies between 
+stores. Consider following example: 
+
+* The `GameStateStore` is holding the information about the current state of the game (like 
+**PAUSED**, **PLAYING**, **OVER** etc).
+* The `SquareStore` contains the information about the squares and their positions and colors on 
+the grid.
+
+The `SquareStore` responds to the `UPDATE` action but only when the state is **PLAYING** (the 
+action is ignored when the game is paused or over), so it depends on the `GameStateStore`. On the
+other hand, if during an update the game comes to an end (which happens in the `SquareStore`; the
+squares on the grid reach the upper row), the `GameStateStore` has to detect that and flip the 
+status which means it depends on the `SquareStore`. To make it more clear, here is exactly what 
+might happen in the game:
+
+1. An `UPDATE` action is dispatched. 
+2. `SquareStore` responds to this action first and checks the `GameStateStore` if the game is on.
+Let's say it is. 
+3. The `SquareStore` updates all squares on the grid and it turns out that  
+some of the squares reach the upper row which means game over.
+4. `GameStateStore` responds to the action second, checks the `SquareStore` and as the game is 
+over, it changes the state to **OVER**.
+
+There is a circular dependency. Both stores need to access each other. Why is it a problem? Well, 
+the stores are usually implemented as JavaScript modules which are then `required` whenever needed.
+The modules of which the application consists form a dependency tree which obviously doesn't allow 
+any circular dependency. What now?
+
+The main objection could be that this is a matter of bad design. Since the game over actually 
+happens in the `SquareStore`, information about it should be held in the `SquareStore` as well. 
+So those two stores should be merged into one. Unfortunately, there are other stores that are by 
+this problem affected as well and they would have to be also merged into one. As a result, 95% of
+the application logic would be handled by a single store.
+
+That is actually not a problem, there are many ways how to organize and separate code and it 
+could all happen within this one store. It would be probably the cleanest solution. But I really 
+liked my stores so I decided to follow this path.
+
+The important thing to realize is that there are actually two types of circular dependencies 
+that might occur.
+
+1. The first one is related to the order in which the stores respond to an action
+(*action dependency graph*). The order is enforced 
+by the `waitFor()` method and if a store A waits on a store B, clearly the store B can't wait on 
+the store A at the same time. But our situation is not this case. In our situation, the order is 
+quite simple: the `SquareStore` goes first and `GameStateStore` goes afterwards. What might 
+happen is that for one action A waits for B, and for another B waits for A. But that's okay. Even
+the Facebook devs [say](https://github.com/facebook/flux/issues/144#issuecomment-72797512) it's 
+okay to have different dependency graphs for different actions.
+2. The second one is on the *module* level, ie. which stores need to access each other. That is 
+our case, because `SquareStore` needs to check `GameStateStore` and at the same time, 
+`GameStateStore` needs to access `SquareStore`. Remember that the stores can be changed only 
+through actions and that their content is accessible only through public read-only API. Therefore
+by *access* I mean *read*. We can talk about *read dependency graphs*.
+ 
+To deal with everything mentioned above, I simply decided to implement stores as individual 
+instances, put them all into one *pool* and shared that *pool* among the stores. Therefore the 
+stores can arbitrarily read from each other. 
+
+That might sound dirty but don't forget:
+
+1. The stores can only read from each other, they can't change each other.
+2. The stores can change only through actions and the order in which they respond to actions is 
+strictly given.
+
+You have to also realize that it's similar to when you work with a set of variables in the same 
+scope. Sometimes there is no hierarchy.
+
+Last remark on this topic: This problem of circular dependencies does exist, there is even an 
+[issue](https://github.com/facebook/flux/issues/28) for that. The conclusion might be that Flux 
+simply doesn't fit all situations. 
+
