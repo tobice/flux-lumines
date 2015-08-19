@@ -227,8 +227,8 @@ stores can arbitrarily read from each other.
 
 That might sound dirty but don't forget:
 
-1. The stores can only read from each other, they can't change each other.
-2. The stores can change only through actions and the order in which they respond to actions is 
+* The stores can only read from each other, they can't change each other.
+* The stores can change only through actions and the order in which they respond to actions is 
 strictly given.
 
 You have to also realize that it's similar to when you work with a set of variables in the same 
@@ -238,3 +238,62 @@ Last remark on this topic: This problem of circular dependencies does exist, the
 [issue](https://github.com/facebook/flux/issues/28) for that. The conclusion might be that Flux 
 simply doesn't fit all situations. 
 
+### The global immutable state
+
+Until now we've been saying that the current game state is held in the stores. This is still true
+from the architecture point of view, but from the implementation perspective (i. e. how the 
+stores are implemented) the actual data is not stored directly in the stores but in one global 
+immutable state. It's like the stores are using an external storage for the data, something like 
+a database.
+
+This idea isn't mine. I took it over from the [Este.js dev stack](https://github.com/steida/este)
+and I think it originated in [Om](https://github.com/omcljs/om).
+
+Let's focus on the word **global**. That means that all application data is stored in a single 
+JavaScript object. It consists of hierarchically structured *maps* (or just JS *objects*) and 
+*collections* (or *arrays*). The stores work sort of like a *view* on the data. It does resemble 
+the typical app structure where you store all data in a database and you access it through 
+a higher *model* layer.
+
+What is it good for? Because it's only one object, you can very easily store it somewhere or even
+move it around and share it. I implemented two demos to demonstrate this capabilities. 
+
+* In the [first demo](https://github.com/tobice/flux-lumines-demos/blob/master/save-state) whenever you 
+pause the game, the state is saved to the Web Storage which means that you can close the 
+browser and when you re-open it you can continue where you left. The game just picks up the state
+if it's available.
+* The [second one](https://github.com/tobice/flux-lumines-demos/tree/master/share-state) is even more 
+fun. Every time the state changes (which means every time an action is dispatched), it's stored 
+to the Web Storage. Then you can open another browser window and *listen* to those changes. The 
+result is that the game play is in real time *mirrored* to the second browser window. Obviously 
+the performance isn't great in this case.
+
+Both demos are really short (just few lines of code) which shows how powerful this technique is.
+
+Okay, now let's move to **immutable**. The global state is implemented as immutable using the 
+[Immutable.js](https://facebook.github.io/immutable-js/) library published by Facebook. I won't 
+go into details as it's kind of complex. If you are not familiar with it I really recommend 
+checking out the documentation or this [amazing video](https://www.youtube.com/watch?v=I7IdS-PbEgI) 
+which perfectly sums up what it is and why it's so good.
+
+To sum it up: When an object is immutable, it means that once it's 
+created, it cannot be changed. Look at the following example: 
+
+```javascript
+var map1 = Map();
+var map2 = map1.set('b', 2);
+```
+
+That's it. Once you try to alter the old map, a new map instance is created instead. 
+
+This has all sorts of benefits but what's interesting for us is that you can compare two objects 
+just by comparing their references. Therefore when the UI is rendered, you can very easily (and 
+efficiently!) detect which parts of the global states have changed and therefore which parts of 
+the UI should be updated. The result is that we can actually afford to re-render the UI 60 times 
+per second as always only a small part of the interface is actually changed.
+
+// Cursors & Daos
+
+// TODO: troubles with deserializing
+
+// TODO: loopholes when working with immutable
