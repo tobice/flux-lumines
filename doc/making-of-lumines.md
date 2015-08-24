@@ -680,3 +680,128 @@ For certain constructs there is no other way than using the *hackish* `dangerous
 attribute.
 
 ## Bonus demo: running Lumines on the server
+
+Okay, now it's the time to answer the ultimate question: What was all of this good for? I'll show
+you a small demo in which one Lumines game play will get shared across multiple
+browser windows or even separate browsers on separate machines. 
+ 
+The demo will consist of the **client** and the **server** side. The server side (daemon) will be 
+the connecting link between all the client instances. It will be receiving incoming Flux 
+actions from the *broadcasting* instance and forwarding them to all *listening* instances. All 
+communication will go through Web Sockets.
+
+*Disclaimer: this is just a simple proof-of-concept demo, not a robust application ready for 
+production. The demo expects to be used as intended.*
+
+Let's start with the server side. The main functionality will be just forwarding the actions 
+using sockets. We'll use an existing Web Socket implementation 
+[ws](https://www.npmjs.com/package/ws).
+
+```javascript
+import {Server} from 'ws'
+
+const server = new Server({port: 9091});
+server.on('connection', client => {
+    client.on('message', data => {
+        server.clients.forEach(client => client.send(data));
+    });
+});
+```
+
+That is easy. Whenever we receive a message, we just take it and send back to all connected 
+clients (including the one we've received the message from, but that doesn't matter, the client 
+will ignore the message).
+
+But what happens if a client connects in the middle of an existing game? It will start receiving 
+the actions but its state will be completely different. What we need to do is to send the current
+state to all new clients before we start distributing actions. And to do that, we need the state 
+to be available on the server. So now is the time to get Lumines running in Node.js environment.
+
+It's a JavaScript application so it shouldn't be much of a problem. Unfortunately, it expects in
+some cases to be in the web browser environment. Just for the sake of this demo, I decided to 
+*mock* the browser in Node.js using [mock-browser](https://www.npmjs.com/package/mock-browser) 
+(which required very little effort).
+
+```javascript
+import mockBrowser from 'mock-browser'
+const MockBrowser = mockBrowser.mocks.MockBrowser;
+GLOBAL.window = MockBrowser.createWindow();
+GLOBAL.document = MockBrowser.createDocument();
+const abstractBrowser = new mockBrowser.delegates.AbstractBrowser({window});
+GLOBAL.navigator = abstractBrowser.getNavigator();
+GLOBAL.localStorage = abstractBrowser.getLocalStorage();
+```
+
+`GLOBAL` is the Node.js' way how to define true global variables accessible from anywhere. Now 
+let's update our application:
+
+```javascript
+const lumines = new Lumines();
+const server = new Server({port: 9091});
+
+server.on('connection', client => {
+    client.on('message', data => {
+        const {action, payload} = JSON.parse(data);
+        lumines.dispatch(action, payload);
+        server.clients.forEach(client => client.send(data));
+    });
+
+    client.send(JSON.stringify(lumines.getState()));
+});
+```
+
+Every incoming action will be dispatched in the local Lumines instance. So when a new client 
+connects, we are able to send it the current state. Thanks to the fact that sockets run over TCP 
+and also that JavaScript/Node.js is single-threaded, we can be sure that all messages will be 
+sent and received in the correct order.
+
+Okay, that was the server part. Now let's move to the client. From the UI perspective, there will
+be two buttons which will allow the user to select whether he wants to *broadcast* actions or 
+*listen* to incoming actions.
+
+First, we'll initialize Lumines. That part is identical for both cases.
+
+```javascript
+const lumines = new Lumines(document.getElementById('lumines'));
+```
+
+Now the *broadcast* mode:
+
+```javascript
+document.getElementById('broadcast').onclick = () => {
+    const ws = new WebSocket(socketUrl);
+    ws.onopen = () => {
+        lumines.register(action => {
+            ws.send(JSON.stringify(action));
+        });
+        lumines.start();
+    };
+};
+```
+
+It's fairly simple. Once the socket is opened, we'll register to the dispatcher and let the user 
+start playing. All dispatched actions will be sent to the server.
+
+The *listening* mode is slightly more complicated because we need to take care of the first 
+incoming message that will contain the initial state from the server.
+
+```javascript
+document.getElementById('listen').onclick = () => {
+    const ws = new WebSocket(socketUrl);
+    ws.onopen = () => {
+        ws.onmessage = event => {
+            lumines.setState(JSON.parse(event.data));
+
+            ws.onmessage = event => {
+                const {action, payload} = JSON.parse(event.data);
+                lumines.dispatch(action, payload);
+                lumines.render();
+            };
+
+            lumines.render();
+        };
+    };
+};
+```
+
+And that's it.
