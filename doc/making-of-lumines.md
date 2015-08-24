@@ -1,7 +1,9 @@
 # Making of Lumines
 
-Lumines is not a typical React application and when I was making it I ran into some interesting 
-issues. 
+Lumines is not a typical React application. I tried to follow the latest trends (like using a
+global immutable state) which are however very often implemented as very simple demos. Once I 
+tried to use those techniques in slightly more complex or non-standard situations, many 
+issues arose. I'll try to cover the most interesting ones in the following text. 
 
 TODO: make a scheme of terms
 
@@ -292,8 +294,389 @@ efficiently!) detect which parts of the global states have changed and therefore
 the UI should be updated. The result is that we can actually afford to re-render the UI 60 times 
 per second as always only a small part of the interface is actually changed.
 
-// Cursors & Daos
+### Working with Immutable objects: cursors and DAOs
 
-// TODO: troubles with deserializing
+Immutable objects are cool and the Immutable.js API is really powerful yet still, the actual work 
+can get a bit cumbersome. There is a one big global object that is shared among all the stores 
+and they all need to write changes to the state. But every change generates a completely new 
+object which we have to remember the reference of and distribute it among the stores.
 
-// TODO: loopholes when working with immutable
+The smart guys decided to solve this using **cursors**. I said the global state works sort of 
+like a database. Then a cursor could be a connection to the database, pointing to a specific 
+table. Except in the case of a JavaScript object it's not really a table (there is no scheme), 
+it's just pointing to a certain place in the object hierarchy, and instead of SQL queries, we use
+update functions.
+
+I used the cursor implementation from [Este.js dev stack](https://github.com/steida/este) which 
+is easy to use:
+
+```javascript
+const positionCursor = state.cursor(['ScanLineStore', 'position'], 0);
+while (positionCursor() < 10) {
+    positionCursor(position => position + 1);
+}
+```
+
+This cursor points directly to the scan line position which is an integer. Just calling the 
+cursor as a function returns the current value. If you want to change the value, pass an 
+update function as the first argument.
+
+In Lumines, the cursors don't usually point to single values, but rather to a complete (sub)
+objects that represent contents of a store. So every store has its own cursor (or possibly more) 
+through which it changes the global state.
+
+That's cool but still not perfect. 
+
+The game logic of Lumines is not complicated but it's also not trivial. And writing the core directly
+using cursors and Immutable.js API makes it hard to read. There is lots of boilerplate code which
+makes the key parts not very clear. 
+
+Let's go back to our database analogy: In database-based applications it's not very common to write 
+the business logic directly in SQL queries. The usual practise is to add another layer of 
+abstraction over the database. Repository, Data Access Object, ORM... or whatever, the approaches
+differ but the ultimate goal is the same.
+
+So that's exactly what I did in Lumines, I wrapped the main game concepts by DAOs that  
+provide nicer and easier-to-read API over the immutable data. An example of such a DAO is the object
+ wrapping the falling block. Look at the following snippet of code:
+
+```javascript
+class Block extends ImmutableDao {
+    // ...
+    
+    get dropped() {
+        return this.cursor().get('dropped');
+    }
+    
+    // ...
+}
+```
+
+Notice the ES6 getter. Checking whether block has been dropped is now very straightforward:
+
+```javascript
+if (block.dropped) {
+    // ...
+}
+```
+
+So even though the data is stored in an immutable structure, the code I'm writing actually looks 
+very *normal*. The immutability and the global state were moved to a lower layer and became an 
+*implementation* detail that I don't have to care about when writing higher level code.
+
+Well, almost.
+
+### The danger of using nested cursors
+
+When working with multiple cursors, you must never 
+forget that you are still changing a single object. Let's say you have two cursors pointing to 
+two different lists and you want to move some elements (determined by the `predicate` function) 
+from the first list to the second.
+
+```javascript
+list1Cursor(l1 => 
+    l1.filter(el => {
+        if (!predicate(el)) {
+            list2Cursor(l2 => l2.push(el));
+            return false;
+        } else return true;
+    });
+);
+```
+
+This will not work and to see why we have to look at how a cursor is actually implemented. This 
+is a pseudo-code of a cursor initialized for a specific path in the state object
+
+```javascript
+let state, path; // somehow initialized in the outer scope
+
+function cursorExample(update) {
+    if (update) {
+        state = state.updateIn(path, update);
+    }
+    state.getIn(path);
+};
+```
+
+Nothing surprising here. If you pass an update function to the cursor, it's applied on the 
+current state which will generate a new state. The reference on the new state is  
+remembered. And that's exactly where the code above fails.
+
+As the first list is being cycled over, we add the filtered out elements to the second one which 
+changes the global state. The problem is that the outer update function in the first cursor has 
+still the reference to the initial state. Which means that when the update function is done and 
+the elements are removed from the list, those changes are applied to the initial state and not 
+the new one where the second list contains the removed elements. So when in the final step the 
+reference to the updated state is remembered, a half of the changes is lost.
+
+What is dangerous about this is that this *feature* is well hidden. The fact that the cursors 
+point to the same global object and that they shouldn't be used like this is not obvious  
+from the code, especially when you introduce the extra abstraction layer as explained above. 
+Therefore making this kind of a mistake is easy and it takes some time to discover what exactly 
+is going wrong here.
+
+Unfortunately, this sort of breaks the nice illusion created by the higher API because you have 
+to be aware of the implementation details of the underlying layer. One solution might be to 
+re-implement the cursors so that they would be able to detect nested calls. For example the Flux 
+dispatcher is doing the same thing. You can't dispatch a new action before you finish
+handling the previous one.
+
+### Immutable Records
+
+Immutable.js library offers lots of data structures. One of them is 
+[Record](https://facebook.github.io/immutable-js/docs/#/Record). It's basically a map (or an 
+*associative array* if you want) except you can specify the set of allowed string keys and 
+default values. It's like a JS object with an enforced scheme.
+
+One of the features of this structure is that you can use standard getters to access the values. 
+So instead of `obj.get('property')` you can write `obj.property`. That's a nice shortcut but 
+what's more important, it makes the ES6 *destructing* work (which turns out to be one of my most 
+favorite ES6 features). For example, this is a function that returns whether there is a square on
+given grid coordinates:
+
+```javascript
+function isFree({x, y}) {
+    // ...
+}
+```
+
+Declaring the function parameters this ways is similar to using *interfaces*. It's like saying 
+"you can pass whatever you want to this function, it just has to have `x` and `y` properties". It
+doesn't work with most of the Immutable structures but it does work with Records, and that is cool.
+
+For these reasons several many entities are implemented as Records in Lumines. That, however, 
+brings another challenge.
+
+### Storing and reviving the global state with custom immutable structures
+
+Lumines supports storing and restoring the global state (as described 
+in the beginning of this chapter, it's an easy way how to save the game or transfer current game 
+state somewhere else). Storing and restoring is based on the Immutable.js API (`toJS()` and `fromJS
+()`) that allows conversion between immutable structures and standard JavaScript structures
+(objects and arrays).
+
+Converting to JS is [straightforward](https://facebook.github.io/immutable-js/docs/#/Iterable/toJS): 
+
+* all structures with strings as keys are converted to objects
+* all structures with numeric keys are converted to arrays 
+
+Converting back is straightforward as well: objects are converted to Maps and arrays to List. 
+**But wait!** What if the original immutable object wasn't a Map but something else? 
+For example Record? Or a normal object (yes, you can store standard objects in an immutable
+structure, although it doesn't make much sense). 
+
+Yes, unfortunately this means that the individual immutable object types get lost during the 
+store/restore procedure which makes it kind of useless. The Immutable.js API offers an option to 
+use a custom [reviver](https://facebook.github.io/immutable-js/docs/#/fromJS) which defines to 
+what kind of structures the input data should be revived. But that's also hardly a perfect 
+solution because that somehow expects that you know the complete structure of the immutable 
+object when you are reviving the data. Probably the cleanest solution would be to let each 
+individual object (in this case probably a store) decide about the way it gets stored and 
+restored. But then the whole magic of having a global state disappears!
+
+To avoid that I decided to implement a slightly smarter reviver as a compromise solution. In 
+Lumines, this issue affects only Records. And Records are cool because they have a fixed set of
+keys. So what I'm doing is that when I'm about to revive a JavaScript object, I simply compare 
+the set of object's keys with the keys of existing Records, and if I find a match, I convert that
+object to this particular record.
+
+```javascript
+const squareKeys = (new Square()).keySeq();
+if (value.keySeq().equals(squareKeys)) {
+    return new Square(value);
+}
+```
+
+The solution is hardly universal but in this case it works quite well.
+
+## The View
+
+The view is the last missing piece in the Flux cycle. Although Flux is a universal pattern that 
+can work with any technology, it was originally designed to complement React. Which is exactly 
+what Lumines uses for its view layer.
+
+### Pure React components
+
+All the components that are used in Lumines are *pure*. That means that they don't maintain any 
+state. All state is held in the global state and is passed as `props` from the root component down 
+the component hierarchy. A pure component behaves sort of like a function. You pass the data as 
+arguments and it returns the "HTML code". That's it.
+
+The components also don't listen to store updates. Instead, the component update is invoked 
+manually whenever an action is successfully dispatched. Invoking an update from outside of the 
+component hierarchy is simple. You just repeatedly call `React.render()` on the same mount point.  
+
+```javascript
+class Lumines {
+    // ...
+    
+    render() {
+        React.render(<GameInterface
+            scanLine={this.scanLineStore.scanLine}
+            state={this.gameStateStore.state}
+            // ...
+            }} />, this.mountpoint);
+    }
+}
+```
+
+Whenever `Lumines.render()` is called (even from the outside of the game), the components perform
+an update so that the UI would correspond the global state.
+
+The last important feature of pure components (which was already mentioned) is that every 
+component detects incoming updated data (`props`) and decides whether it should update and 
+re-render. Obviously under normal circumstances comparing two deep JS objects would be expansive.
+But as the whole state is immutable (consisting of immutable structures), we can do the 
+comparison very quickly. 
+
+How to make a component *pure* so that all of the above works? There is a 
+[PureRenderMixin](https://facebook.github.io/react/docs/pure-render-mixin.html) for that which in
+case of ES6 syntax can be replaced with a 
+[base pure component](https://github.com/gaearon/react-pure-render). Once again I recommend this 
+[nice (and not very long) video](https://www.youtube.com/watch?v=I7IdS-PbEgI) which explains all 
+of this.
+
+### Using SVG to paint the UI
+
+For those of you who didn't know, SVG is internally an XML-based format. It's like HTML (or 
+possibly XHTML) except the tags are different. You can always include SVG image using the `img` 
+tag but the browsers nowadays support *inline* SVG. That means that you can actually put SVG code 
+directly in the HTML markup.
+
+Just a simple example of a circle painted with SVG (taken from 
+[W3Schools](http://www.w3schools.com/html/html5_svg.asp)):
+
+```html
+<!DOCTYPE html>
+<html>
+<body>
+
+<svg width="100" height="100">
+  <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+</svg>
+
+</body>
+</html>
+```
+
+SVG uses internal coordinates which by default map to pixels. But that behavior can be changed 
+using [`viewBox`](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox).
+
+```html
+<svg viewBox="0 0 160 90" >
+</svg>
+```
+
+This way you define that the SVG image will be 160 points wide and 90 points high. This 
+coordinate system will be used when positioning the SVG objects inside the image. But the actual 
+size of the image on the screen can be arbitrary or even responsive!
+
+This is exactly how Lumines is done. The game UI has strict inner dimensions which allow easy and 
+exact positioning of the game elements (these coordinates are used even for detecting the square 
+collisions and other game mechanics) but the actual on screen dimensions are completely 
+independent. The `svg` element is 
+stretched out using CSS to take up as much screen space as possible. Therefore the game will be 
+able to work on screen of any size and also thanks to the vector nature of SVG it will always look 
+good and 100% sharp (even on retina screens). 
+
+This the theory. In practise, some browses (*caugh caugh* IE) struggle to stretch out the SVG 
+image properly and some dirty hacks are required. More on this topic for example here
+[here](http://tympanus.net/codrops/2014/08/19/making-svgs-responsive-with-css/).
+
+Anyway, since you can use SVG pretty much the same way like HTML, you can use React for 
+generating the code. It works exactly as expected, except now you have way stronger tools for 
+creating the UI.
+
+One of the best React features is that you can split your UI into standalone independent 
+components. This is for example a component representing a square:
+
+```javascript
+import React from 'react';
+import classNames from 'classnames';
+
+import PureComponent from './PureComponent.js';
+import {SQUARE_SIZE} from '../game/dimensions.js';
+
+export default class Square extends PureComponent {
+    render() {
+        const classes = classNames({
+            'lumines-square': true,
+            'lumines-square-dark': this.props.color,
+            'lumines-square-light': !this.props.color,
+            'lumines-square-scanned': this.props.scanned
+        });
+
+        return (
+            <rect x={this.props.x} y={this.props.y}
+                width={SQUARE_SIZE} height={SQUARE_SIZE}
+                className={classes} />
+        );
+    }
+}
+```
+
+Several things to notice:
+* As explained in the previous part, the component is *pure*. No inner state, everything is passed 
+through the `props`.
+* There are CSS classes involved. Yes, SVG supports styling which means that you can move 
+lots of things to a separate stylesheet. We use SVG to sort of define what entities 
+should be on the screen and *where* they should be whereas styles are used for how the entities 
+should actually look like.
+* A useful utility called [`classNames()`](https://www.npmjs.com/package/classnames) 
+is used to generate the list of classes that should be 
+applied to the component. Originally it was part of the React but it's been moved to a separate 
+package.
+
+Another useful component is a component that *moves* other objects around: 
+
+```javascript
+class Move extends PureComponent {
+    render() {
+        return (
+            <g transform={'translate(' + this.props.x + ' ' + this.props.y + ')'}>
+                {this.props.children}
+            </g>
+        );
+    }
+}
+```
+
+This is how you'd use it:
+
+```javascript
+<Move x={GUTTER} y={GUTTER + 2 * SQUARE_SIZE}>
+    <Queue queue={this.props.queue} />
+</Move>
+```
+
+It wraps all of the inner SVG objects by a SVG
+[group](https://developer.mozilla.org/cs/docs/Web/SVG/Element/g) and applies a transformation which
+moves all inner objects to desired coordinates.
+
+In general, the whole UI is separated into individual components with semantic names. Eventually 
+the UI definition is extremely easy to read and work with.
+
+Some of the advanced SVG graphic features are used as well. Like for example gaussian blur. The 
+falling block is vertically blurred when it's dropped and the blur strength depends on the current 
+speed. 
+
+```javascript
+<g className="lumines-block" style={{filter: "url('#blur')"}}>
+    <defs dangerouslySetInnerHTML={{__html:
+        '<filter color-interpolation-filters="sRGB" id="blur" x="0" y="0">' +
+        '    <feGaussianBlur in="SourceGraphic" stdDeviation="0,' + block.speed / 150 + '"/> ' +
+        '</filter>'}} />
+    {block.squares.map((color, i) =>
+        <Square key={i} color={color}
+            x={block.x + getBlockSquareX(i)}
+            y={discretize(block.y + getBlockSquareY(i))} />
+    )}
+</g>
+```
+
+Unfortunately, this example shows the biggest problem of rendering SVG using React. The SVG support
+is rather [limited](https://facebook.github.io/react/docs/tags-and-attributes.html#svg-elements).
+For certain constructs there is no other way than using the *hackish* `dangerouslySetInnerHTML` 
+attribute.
+
+## Bonus demo: running Lumines on the server
