@@ -1,11 +1,38 @@
 # Making of Lumines
 
-Lumines is not a typical React application. I tried to follow the latest trends (like using a
-global immutable state) which are however very often implemented as very simple demos. Once I 
-tried to use those techniques in slightly more complex or non-standard situations, many 
-issues arose. I'll try to cover the most interesting ones in the following text. 
+Lumines is not a typical React application and I also tried to follow the latest trends, 
+technologies and tools (like using a global immutable state). But those are very often used only in simplified 
+demos and examples. Once I tried to use those techniques in slightly more complex or non-standard 
+situations, many issues and challenges arose. I'll try to cover the most interesting ones in the 
+following text. 
 
-TODO: make a scheme of terms
+**Table of contents**
+* [User interface scheme](#user-interface-scheme)
+* [The Flux](#the-flux)
+* [The actions](#the-actions)
+    * [Main game loop](#main-game-loop)
+    * [Making the game deterministic](#making-the-game-deterministic)
+* [The stores](#the-stores)
+    * [Using waitFor() ](#using-waitfor)
+    * [Circular dependencies](#circular-dependencies)
+    * [The global immutable state](#the-global-immutable-state)
+    * [Working with Immutable objects: cursors and DAOs](#working-with-immutable-objects-cursors-and-daos)
+    * [The danger of using nested cursors](#the-danger-of-using-nested-cursors)
+    * [Immutable Records](#immutable-records)
+    * [Storing and reviving the global state with custom immutable structures](#storing-and-reviving-the-global-state-with-custom-immutable-structures)
+* [The view](#the-view)
+    * [Pure React components](#pure-react-components)
+    * [Using SVG to paint the UI](#using-svg-to-paint-the-ui)
+* [Bonus demo: running Lumines on the server](#bonus-demo-running-lumines-on-the-server)
+* [The conclusion](#the-conclusion)
+
+## User interface scheme
+
+The following text is about this game which means that I'll be quite often referring to game 
+components and entities. To give you a better idea of what names are used, here is a simple 
+scheme of the user interface.
+
+[![User Interface Scheme](./ui-scheme.png)](./ui-scheme.png)
 
 ## The Flux
 
@@ -104,11 +131,17 @@ An actual implementation of this can be found [here](https://github.com/tobice/f
 
 ## The stores
 
-TODO: make a scheme of stores
-
 The game consists of several separated logical components and each one of them is represented by 
-a single store. A typical example is the `ScanLineStore` that represents the scan line. All 
-stores are registered to the **dispatcher** (including this one) and listen to all incoming 
+a single store. A typical example is the `ScanLineStore` that represents the scan line. To give you
+an idea of what stores exist in the game and what they are responsible for, here is a simple schema.
+
+[![Store Scheme](./store-scheme.png)](./store-scheme.png)
+
+Not all stores are on the scheme (their presence wouldn't make much sense). Those are 
+`ConfigStore` (holds current game's configuration), `GravityStore` (current gravity affecting the 
+speed of falling squares) and `GameStateStore` (current state, like `PLAYING`, `PAUSED`, `OVER`...).
+
+All stores are registered to the **dispatcher** and listen to all incoming 
 actions. Regarding stores, there are several neat features stemming from the Flux pattern:
 
 1. All stores can be updated only through actions.
@@ -489,7 +522,7 @@ if (value.keySeq().equals(squareKeys)) {
 
 The solution is hardly universal but in this case it works quite well.
 
-## The View
+## The view
 
 The view is the last missing piece in the Flux cycle. Although Flux is a universal pattern that 
 can work with any technology, it was originally designed to complement React. Which is exactly 
@@ -777,7 +810,7 @@ document.getElementById('broadcast').onclick = () => {
         lumines.start();
     };
 };
-```
+```ui-scheme
 
 It's fairly simple. Once the socket is opened, we'll register to the dispatcher and let the user 
 start playing. All dispatched actions will be sent to the server.
@@ -805,3 +838,11 @@ document.getElementById('listen').onclick = () => {
 ```
 
 And that's it.
+
+## The conclusion
+
+I hope that this text might one day help someone facing similar problems. If nothing else, it 
+proves that although new technologies and techniques are cool and fun to use, they present all 
+sorts of new challenges. The question is whether in some cases a slightly more traditional 
+approach wouldn't have been better. This new approach brings many interesting features on the 
+table (like sharing of the state) but are they really useful?
