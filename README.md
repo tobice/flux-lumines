@@ -3,7 +3,7 @@
 Lumines implementation using modern JavaScript technologies, including React.js, Flux and 
 Immutable.js
 
-[![Screenshot](./doc/screenshot.png)](./doc/screenshot.png)
+[![Screenshot](./img/screenshot.png)](./img/screenshot.png)
 
 ## Have you ever tried to update the React UI 60 times per second?
 
