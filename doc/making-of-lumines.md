@@ -1,10 +1,8 @@
 # Making of Lumines
 
-Lumines is not a typical React application and I also tried to follow the latest trends, 
-technologies and tools (like using a global immutable state). But those are very often used only in simplified 
-demos and examples. Once I tried to use those techniques in slightly more complex or non-standard 
-situations, many issues and challenges arose. I'll try to cover the most interesting ones in the 
-following text. 
+As Lumines is not a typical React application (and I also tried some of the latest trends 
+and tools, like using the global immutable state), I ran into various issues and challenges. I'll
+try to cover the most interesting ones in the following text.
 
 **Table of contents**
 * [User interface scheme](#user-interface-scheme)
@@ -38,7 +36,7 @@ scheme of the user interface.
 
 Flux is what drives this application. It's an application architecture or maybe just a pattern,
 introduced (or popularized) by Facebook. If you are not familiar with Flux, you should check 
-the [website](https://facebook.github.io/flux/docs/overview.html#content).
+out the [website](https://facebook.github.io/flux/docs/overview.html#content).
 
 The nice thing about Flux is that you can get a pretty good idea of how it works just by looking 
 at a single picture (and I'm going to borrow that picture from their website).
@@ -54,7 +52,7 @@ To give you an idea how Flux works in Lumines, here is an example:
 
 1. The player hits the button **A**.
 2. Action `ROTATE_LEFT` is created and dispatched using **dispatcher** to all stores.
-3. The **Block store** will respond to this action and update itself. It will rotate the falling 
+3. The `BlockStore` will respond to this action and update itself. It will rotate the falling 
 block to the left.
 4. The whole game UI (React components) is rerendered.
 
@@ -69,7 +67,7 @@ other way, but there are other Flux features that will turn out extremely useful
 ## The actions
 
 Most of the *actions* used in Lumines are very simple and are directly bound to key strokes. 
-The purpose of these actions is to control to game. The `ROTATE_LEFT` action was a typical 
+The purpose of these actions is to control the game. The `ROTATE_LEFT` action was a typical 
 example but obviously there are more: `ROTATE_RIGHT`, `MOVE_LEFT`, `MOVE_RIGHT`, `PAUSE`, 
 `RESTART` etc.
 
@@ -77,11 +75,11 @@ example but obviously there are more: `ROTATE_RIGHT`, `MOVE_LEFT`, `MOVE_RIGHT`,
 
 One special action is the `UPDATE` action. This action creates the *illusion* of time in the game. 
 It's dispatched approximately 60 times per second and carries the time elapsed since the last 
-dispatch of this action. This action basically shifts the time pointer in the game so it's 
+dispatch of this action. This action basically shifts the time pointer in the game which is 
 crucial for the game mechanics.
 
 One of the elements it directly affects is the **scan line** (the line going from the left to the
-right, sweeping the grid) which is represented in the **ScanLineSore**. The line is defined by 
+right, sweeping the grid) which is represented in the `ScanLineSore`. The line is defined by 
 it's current `x` position and by its speed. When the `UPDATE` action is dispatched, the store 
 responds and increases the `x` position by speed times elapsed time.
 
@@ -101,7 +99,9 @@ const update = (time) => {
 requestAnimationFrame(update);
 ```
 
-If you ever created a WebGL/OpenGL application, this should look very familiar to you.
+If you ever created a WebGL/OpenGL application, this should look very familiar to you. The `time`
+parameter passed to the update function is the current timestamp. The `Clock` utility is used to 
+measure/calculate the elapsed time between individual ticks.
 
 ### Making the game deterministic
 
@@ -133,7 +133,8 @@ An actual implementation of this can be found [here](https://github.com/tobice/f
 
 The game consists of several separated logical components and each one of them is represented by 
 a single store. A typical example is the `ScanLineStore` that represents the scan line. To give you
-an idea of what stores exist in the game and what they are responsible for, here is a simple schema.
+an idea of which stores exist in the game and what they are responsible for, here is a simple 
+schema.
 
 [![Store Scheme](./store-scheme.png)](./store-scheme.png)
 
@@ -145,7 +146,7 @@ All stores are registered to the **dispatcher** and listen to all incoming
 actions. Regarding stores, there are several neat features stemming from the Flux pattern:
 
 1. All stores can be updated only through actions.
-2. All actions come through a single entry in the store.
+2. All actions come through a single entry point in the store.
 3. A new action cannot be dispatched before the previous is finished. That also means that all 
 stores are updated at once in a single run, always leaving the application in a consistent state.
 3. The data inside a store are accessible from the outside only through a read-only public API.
@@ -201,7 +202,7 @@ nicely separated. It's perfect... except it's not.
 ### Circular dependencies
 
 Flux is an easy to understand concept but once you try to actually use it, you might soon get 
-into troubles. One of the complications that might arise are circular dependencies between 
+into trouble. One of the complications that might arise are circular dependencies between 
 stores. Consider following example: 
 
 * The `GameStateStore` is holding the information about the current state of the game (like 
@@ -278,8 +279,8 @@ simply doesn't fit all situations.
 Until now we've been saying that the current game state is held in the stores. This is still true
 from the architecture point of view, but from the implementation perspective (i. e. how the 
 stores are implemented) the actual data is not stored directly in the stores but in one global 
-immutable state. It's like the stores are using an external storage for the data, something like 
-a database.
+immutable state. It could be said that the stores are using an external storage for the data 
+(something like a database).
 
 This idea isn't mine. I took it over from the [Este.js dev stack](https://github.com/steida/este)
 and I think it originated in [Om](https://github.com/omcljs/om).
@@ -323,25 +324,36 @@ That's it. Once you try to alter the old map, a new map instance is created inst
 
 This has all sorts of benefits but what's interesting for us is that you can compare two objects 
 just by comparing their references. Therefore when the UI is rendered, you can very easily (and 
-efficiently!) detect which parts of the global states have changed and therefore which parts of 
-the UI should be updated. The result is that we can actually afford to re-render the UI 60 times 
-per second as always only a small part of the interface is actually changed.
+efficiently!) detect which parts of the global state have changed and therefore which parts of 
+the UI should be updated. The consequence is that we can actually afford to re-render the UI 60 
+times per second as always only a small part of the interface is actually changed (check the 
+video for more detailed explanation).
 
 ### Working with Immutable objects: cursors and DAOs
 
-Immutable objects are cool and the Immutable.js API is really powerful yet still, the actual work 
-can get a bit cumbersome. There is a one big global object that is shared among all the stores 
+Immutable objects are cool and the Immutable.js API is really powerful. Yet still, the actual work 
+can get a bit cumbersome. There is one big global object that is shared among all the stores 
 and they all need to write changes to the state. But every change generates a completely new 
-object which we have to remember the reference of and distribute it among the stores.
+object which we have to remember the reference of. And distribute it among the stores.
 
-The smart guys decided to solve this using **cursors**. I said the global state works sort of 
+The smart guys decided to solve this using **cursors**. I said that the global state works sort of 
 like a database. Then a cursor could be a connection to the database, pointing to a specific 
 table. Except in the case of a JavaScript object it's not really a table (there is no scheme), 
 it's just pointing to a certain place in the object hierarchy, and instead of SQL queries, we use
 update functions.
 
-I used the cursor implementation from [Este.js dev stack](https://github.com/steida/este) which 
-is easy to use:
+I used the cursor implementation from [Este.js dev stack](https://github.com/steida/este). Let's 
+say that our object has the following structure:
+
+```javascript
+{
+    'ScanLineStore': {
+        'position': 0
+    }
+}
+```
+
+This is how you'd use the cursor: 
 
 ```javascript
 const positionCursor = state.cursor(['ScanLineStore', 'position'], 0);
@@ -354,7 +366,7 @@ This cursor points directly to the scan line position which is an integer. Just 
 cursor as a function returns the current value. If you want to change the value, pass an 
 update function as the first argument.
 
-In Lumines, the cursors don't usually point to single values, but rather to a complete (sub)
+In Lumines, the cursors don't usually point to single values, but rather to complete (sub)
 objects that represent contents of a store. So every store has its own cursor (or possibly more) 
 through which it changes the global state.
 
@@ -369,9 +381,9 @@ the business logic directly in SQL queries. The usual practise is to add another
 abstraction over the database. Repository, Data Access Object, ORM... or whatever, the approaches
 differ but the ultimate goal is the same.
 
-So that's exactly what I did in Lumines, I wrapped the main game concepts by DAOs that  
-provide nicer and easier-to-read API over the immutable data. An example of such a DAO is the object
- wrapping the falling block. Look at the following snippet of code:
+So that's exactly what I did in Lumines, I wrapped the main game concepts by DAOs that  provide 
+nicer and easier-to-read API over the immutable data. An example of such a DAO is the object
+wrapping the falling block. Look at the following snippet of code:
 
 ```javascript
 class Block extends ImmutableDao {
@@ -427,13 +439,13 @@ function cursorExample(update) {
     if (update) {
         state = state.updateIn(path, update);
     }
-    state.getIn(path);
+    return state.getIn(path);
 };
 ```
 
 Nothing surprising here. If you pass an update function to the cursor, it's applied on the 
-current state which will generate a new state. The reference on the new state is  
-remembered. And that's exactly where the code above fails.
+current state which will generate a new state. The reference on the new state is  remembered. And 
+that's exactly where the code above fails.
 
 As the first list is being cycled over, we add the filtered out elements to the second one which 
 changes the global state. The problem is that the outer update function in the first cursor has 
@@ -443,10 +455,9 @@ the new one where the second list contains the removed elements. So when in the 
 reference to the updated state is remembered, a half of the changes is lost.
 
 What is dangerous about this is that this *feature* is well hidden. The fact that the cursors 
-point to the same global object and that they shouldn't be used like this is not obvious  
-from the code, especially when you introduce the extra abstraction layer as explained above. 
-Therefore making this kind of a mistake is easy and it takes some time to discover what exactly 
-is going wrong here.
+point to the same global object and that they shouldn't be used like this is not obvious  from the 
+code, especially when you introduce the extra abstraction layer as explained above. Therefore making
+this kind of a mistake is easy and it takes some time to discover what exactly is going wrong here.
 
 Unfortunately, this sort of breaks the nice illusion created by the higher API because you have 
 to be aware of the implementation details of the underlying layer. One solution might be to 
@@ -493,9 +504,9 @@ Converting to JS is [straightforward](https://facebook.github.io/immutable-js/do
 * all structures with strings as keys are converted to objects
 * all structures with numeric keys are converted to arrays 
 
-Converting back is straightforward as well: objects are converted to Maps and arrays to List. 
+Converting back is straightforward as well: objects are converted to Maps and arrays to Lists. 
 **But wait!** What if the original immutable object wasn't a Map but something else? 
-For example Record? Or a normal object (yes, you can store standard objects in an immutable
+For example a Record? Or a normal object (yes, you can store standard objects in an immutable
 structure, although it doesn't make much sense). 
 
 Yes, unfortunately this means that the individual immutable object types get lost during the 
@@ -507,7 +518,7 @@ object when you are reviving the data. Probably the cleanest solution would be t
 individual object (in this case probably a store) decide about the way it gets stored and 
 restored. But then the whole magic of having a global state disappears!
 
-To avoid that I decided to implement a slightly smarter reviver as a compromise solution. In 
+To avoid that, I decided to implement a slightly smarter reviver as a compromise solution. In 
 Lumines, this issue affects only Records. And Records are cool because they have a fixed set of
 keys. So what I'm doing is that when I'm about to revive a JavaScript object, I simply compare 
 the set of object's keys with the keys of existing Records, and if I find a match, I convert that
@@ -560,7 +571,7 @@ The last important feature of pure components (which was already mentioned) is t
 component detects incoming updated data (`props`) and decides whether it should update and 
 re-render. Obviously under normal circumstances comparing two deep JS objects would be expansive.
 But as the whole state is immutable (consisting of immutable structures), we can do the 
-comparison very quickly. 
+comparison very quickly just by comparing the references of the current data and the incoming data. 
 
 How to make a component *pure* so that all of the above works? There is a 
 [PureRenderMixin](https://facebook.github.io/react/docs/pure-render-mixin.html) for that which in
@@ -606,19 +617,18 @@ size of the image on the screen can be arbitrary or even responsive!
 
 This is exactly how Lumines is done. The game UI has strict inner dimensions which allow easy and 
 exact positioning of the game elements (these coordinates are used even for detecting the square 
-collisions and other game mechanics) but the actual on screen dimensions are completely 
-independent. The `svg` element is 
-stretched out using CSS to take up as much screen space as possible. Therefore the game will be 
-able to work on screen of any size and also thanks to the vector nature of SVG it will always look 
-good and 100% sharp (even on retina screens). 
+collisions and other game mechanics) but the actual on screen dimensions are completely independent.
+The `svg` element is stretched out using CSS to take up as much screen space as possible. Therefore
+the game will be able to work on screens of any size and also thanks to the vector nature of SVG 
+it will always look good and 100% sharp (even on retina screens). 
 
 This the theory. In practise, some browses (*caugh caugh* IE) struggle to stretch out the SVG 
-image properly and some dirty hacks are required. More on this topic for example here
+image properly and some dirty hacks are required. More on this topic for example
 [here](http://tympanus.net/codrops/2014/08/19/making-svgs-responsive-with-css/).
 
 Anyway, since you can use SVG pretty much the same way like HTML, you can use React for 
-generating the code. It works exactly as expected, except now you have way stronger tools for 
-creating the UI.
+generating the SVG XML code. It works exactly as expected, except now you have way stronger tools 
+for creating the UI.
 
 One of the best React features is that you can split your UI into standalone independent 
 components. This is for example a component representing a square:
@@ -656,9 +666,8 @@ lots of things to a separate stylesheet. We use SVG to sort of define what entit
 should be on the screen and *where* they should be whereas styles are used for how the entities 
 should actually look like.
 * A useful utility called [`classNames()`](https://www.npmjs.com/package/classnames) 
-is used to generate the list of classes that should be 
-applied to the component. Originally it was part of the React but it's been moved to a separate 
-package.
+is used to generate the list of classes that should be applied to the component. Originally it was
+part of React but it's been moved to a separate package.
 
 Another useful component is a component that *moves* other objects around: 
 
@@ -715,8 +724,8 @@ attribute.
 ## Bonus demo: running Lumines on the server
 
 Okay, now it's the time to answer the ultimate question: What was all of this good for? I'll show
-you a small demo in which one Lumines game play will get shared across multiple
-browser windows or even separate browsers on separate machines. 
+you a small demo in which one Lumines game play will get shared across multiple browser windows or
+even separate browsers on separate machines. 
  
 The demo will consist of the **client** and the **server** side. The server side (daemon) will be 
 the connecting link between all the client instances. It will be receiving incoming Flux 
@@ -810,7 +819,7 @@ document.getElementById('broadcast').onclick = () => {
         lumines.start();
     };
 };
-```ui-scheme
+```
 
 It's fairly simple. Once the socket is opened, we'll register to the dispatcher and let the user 
 start playing. All dispatched actions will be sent to the server.
