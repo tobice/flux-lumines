@@ -27,6 +27,9 @@ import {RESTART, PAUSE, UPDATE, ROTATE_LEFT, ROTATE_RIGHT, MOVE_LEFT, MOVE_RIGHT
 import {KEY_A, KEY_D, KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_ESC, KEY_R} from './game/consts.js';
 import {OVER, PAUSED} from './game/gameStates.js';
 
+import gameStates from './game/gameStates.js';
+import actions from './game/actions.js';
+
 export default class Lumines {
 
     constructor(mountpoint, config) {
@@ -184,3 +187,6 @@ export default class Lumines {
         return this.stores.gameStateStore.state === OVER;
     }
 }
+
+Lumines.actions = actions;
+Lumines.gameStates = gameStates;
