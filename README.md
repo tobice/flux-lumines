@@ -3,12 +3,15 @@
 Lumines implementation using modern JavaScript technologies, including React.js, Flux and 
 Immutable.js
 
+Check out [this video](https://www.youtube.com/watch?v=C4sE17kK2iM) showing the game play and 
+also some of the neat Flux capabilities.
+
 [![Screenshot](./img/screenshot.png)](./img/screenshot.png)
 
 ## Have you ever tried to update the React UI 60 times per second?
 
 What's making this game special is that it actually renders at 60 fps creating buttery smooth 
-gameplay experience. And it's completely written in React! **So what's under the hood?**
+game play experience. And it's written completely in React! **So what's under the hood?**
 
 * The actual graphics is drawn in **SVG**. SVG in browsers is probably not as powerful or 
 performant as WebGL but it's way easier to use and it's still strong (offering many cool features 
@@ -21,10 +24,9 @@ of React: you *don't mutate* the UI, you *re-render* it. So the game works very 
 a typical OpenGL/WebGL application. But instead of painting with GL commands into a framebuffer, 
 you can enjoy the comfort of React and SVG.
 * In the heart of the game is the [**Flux**](https://facebook.github.io/flux/) cycle, with the 
-stores, the dispatcher and actions. The 
-state of each game component (block, queue, scan line, score, time...) is represented by a 
-separate store handling incoming actions. And the actions are usually just the keyboard input 
-coming from the player.
+stores, the dispatcher and actions. The state of each game component (block, queue, scan line, 
+score, time...) is represented by a separate store handling incoming actions. And the actions are
+usually just the keyboard input coming from the player.
 * Finally, what's making the game fast enough is the fact that the whole state is stored in 
 a big global [**Immutable**](https://facebook.github.io/immutable-js/) state. Thanks to the 
 immutability we can easily check for changes in any part of the state and consequently 
@@ -49,6 +51,12 @@ lines of code.
 You might have heard about these possibilities. But I have actually implemented them. Check out 
 [this separate repo](https://github.com/tobice/flux-lumines-demos) with some demos based on 
 Lumines.
+
+**Interested in more information about how Lumines is implemented?**
+
+I wrote an article summing up most of the challenges that I run into when writing this game. You
+can find it in this repo Wiki: [Making of Lumines](https://github.com/tobice/flux-lumines/wiki/Making-of-Lumines)
+
 
 ## Wanna try it out?
 
